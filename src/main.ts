@@ -13,7 +13,7 @@ export const app = new Application();
   // Append the application canvas to the document body
   document.getElementById("pixi-container")!.appendChild(app.canvas);
 
-  // await initAssets();
+  await initAssets();
   setupWebsocket(onUpdate);
 
   app.ticker.add((time) => {

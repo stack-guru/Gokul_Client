@@ -7,6 +7,10 @@ export function randomNumber(n: number) {
     return Math.floor(Math.random() * n);
 }
 
+export function MathLerp(a: number, b: number, t: number) {
+    return a + (b - a) * t;
+}
+
 export function adjustBrightnessRGB(red: number, green: number, blue: number, amount: number) {
     // Increase or decrease each component by 'amount'
     let newR = red + amount;
@@ -40,3 +44,4 @@ export function drawDebugRect(objs: any[]) {
         }
     }
 }
+

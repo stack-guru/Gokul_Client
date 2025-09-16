@@ -12,23 +12,8 @@ import {
     bkTexture,
     glowTexture
 } from "./asset";
-import { GameObjects } from "./type";
 import { HEAD_EYES } from "./constant";
-
-let gId = 0;
-let prevData = null;
-let gameObjects: GameObjects = {
-    units: {},
-    dynamics: {},
-    statics: {}
-};
-let cameraX = 0;//camera target
-let cameraY = 0;
-let pivotX = 0;
-let pivotY = 0;
-let mySnakeH = null;
-let mySnakeId = -1;
-const DEBUG = false;
+import { GameState } from "./gameState";
 
 function CreateCircle(texture: Texture, x: number, y: number, z: number, scale = 1, rot = 0) {
     // gId++;
@@ -45,8 +30,60 @@ function CreateCircle(texture: Texture, x: number, y: number, z: number, scale =
     // return sprite;
 }
 
+function rotate_by_pivot(px: number, py: number, pr: number, ox: number, oy: number) {//sets location by rotating around a different pivot point
+    //pr = exports.NormalizeDegrees(pr);
+    //var c_ = Math.cos(exports.degToRad(pr));
+    //var s_ = Math.sin(exports.degToRad(pr));
+    const c_ = Math.cos(pr);//use radians
+    const s_ = Math.sin(pr);
+    const x = px + ((ox * c_) - (oy * s_));
+    const y = py + ((oy * c_) + (ox * s_));
+    return [x, y];
+}
+
+function CleanGroupObj(Group: any, sGroup: any) {
+    //auto clean up removed units
+    let remove = [];
+    for (let uid in Group) {
+        if (Group.hasOwnProperty(uid)) {
+            if (sGroup.hasOwnProperty(parseInt(uid)) === false) {
+                remove.push(uid);
+            }
+        }
+    }
+
+    for (let i = 0; i < remove.length; i++) {
+        let kk = remove[i];
+        let obj = Group[kk];
+        if (obj.parent) {
+            obj.parent.removeChild(obj);
+        }
+        if (obj.hasOwnProperty("EYES")) {
+            if (obj.EYES !== null) {
+                obj.EYES.destroy();
+            }
+        }//Units have eyes somtimes
+        if (obj.hasOwnProperty("EYES1")) {
+            if (obj.EYES1 !== null) {
+                obj.EYES1.destroy();
+            }
+        }//Units have eyes somtimes
+        if (obj.hasOwnProperty("EYES2")) {
+            if (obj.EYES2 !== null) {
+                obj.EYES2.destroy();
+            }
+        }//Units have eyes somtimes
+        if (obj.hasOwnProperty("GLOW")) {//units have glow
+            obj.GLOW.destroy();
+        }
+
+        obj.destroy();
+        delete Group[kk];//remove
+    }
+}
+
 export function onUpdate(pId: number, x: number, y: number, data: any) {
-    prevData = data; //SAVE
+    GameState.prevData = data; //SAVE
     let obj, id;
     const fspeed = 0.1;
 
@@ -79,8 +116,8 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
     for (id in data.dynamics) {
         if (data.dynamics.hasOwnProperty(id)) {
             obj = data.dynamics[id];
-            if (gameObjects.dynamics.hasOwnProperty(id)) {
-                let fObj = gameObjects.dynamics[id];
+            if (GameState.gameObjects.dynamics.hasOwnProperty(id)) {
+                let fObj = GameState.gameObjects.dynamics[id];
                 fObj.tx = obj[1]; fObj.ty = obj[2];
                 fObj.width = obj[5]; fObj.height = obj[6];
 
@@ -102,8 +139,8 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
             else {
                 //console.log('CreateCircle ' + obj[0])
                 //console.log(obj)
-                //gameObjects.dynamics[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
-                gameObjects.dynamics[id] = CreateCircle(headTexture, obj[1], obj[2], obj[3], 1);
+                //GameState.gameObjects.dynamics[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
+                GameState.gameObjects.dynamics[id] = CreateCircle(headTexture, obj[1], obj[2], obj[3], 1);
                 //let COLORS =  ["f5e0dc", "f2cdcd", "f5c2e7", "cba6f7", "f38ba8", "eba0ac", "fab387", "f9e2af",
                 //"a6e3a1", "94e2d5", "89dceb", "74c7ec", "89b4fa", "b4befe"];
                 //COLORS = ['EAB999', '00ff88', 'ff4400', '0088ff', 'aa44ff', 'ffaa00']
@@ -112,22 +149,22 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
                 //{ name: 'Classic', color:  },                { name: 'Neon', color: '#00ff88' },                { name: 'Fire', color: '#ff4400' },
                 //{ name: 'Ocean', color: '#0088ff' },                { name: 'Purple', color: '#aa44ff' },                { name: 'Gold', color: '#ffaa00' }
 
-                gameObjects.dynamics[id].tint = COLORS[randomNumber(COLORS.length - 1)];//rgbToHex(RandInt(256), RandInt(256), RandInt(256));
-                gameObjects.dynamics[id].tx = obj[1];
-                gameObjects.dynamics[id].ty = obj[2];
-                gameObjects.dynamics[id].width = obj[5]
-                gameObjects.dynamics[id].height = obj[6];
-                gameObjects.dynamics[id].TYPE = obj[0];
-                gameObjects.dynamics[id].alpha = 0.5
-                gameObjects.dynamics[id].ADIR = randomNumber(1);
+                GameState.gameObjects.dynamics[id].tint = COLORS[randomNumber(COLORS.length - 1)];//rgbToHex(RandInt(256), RandInt(256), RandInt(256));
+                GameState.gameObjects.dynamics[id].tx = obj[1];
+                GameState.gameObjects.dynamics[id].ty = obj[2];
+                GameState.gameObjects.dynamics[id].width = obj[5]
+                GameState.gameObjects.dynamics[id].height = obj[6];
+                GameState.gameObjects.dynamics[id].TYPE = obj[0];
+                GameState.gameObjects.dynamics[id].alpha = 0.5
+                GameState.gameObjects.dynamics[id].ADIR = randomNumber(1);
 
                 //Always glow
-                //gameObjects.dynamics[id].filters = [PIXICam.GLOW_FILTER];//ON GLOW
+                //GameState.gameObjects.dynamics[id].filters = [PIXICam.GLOW_FILTER];//ON GLOW
 
-                //gameObjects.dynamics[id].filters = [new PIXI.filters.BlurFilter(5)]; // Adjust blur amount
-                //gameObjects.dynamics[id].blendMode = PIXI.BLEND_MODES.ADD;
-                //if(obj[0] < 7){ gameObjects.dynamics[id].depth = 1; }
-                //else {gameObjects.dynamics[id].depth = 2;}
+                //GameState.gameObjects.dynamics[id].filters = [new PIXI.filters.BlurFilter(5)]; // Adjust blur amount
+                //GameState.gameObjects.dynamics[id].blendMode = PIXI.BLEND_MODES.ADD;
+                //if(obj[0] < 7){ GameState.gameObjects.dynamics[id].depth = 1; }
+                //else {GameState.gameObjects.dynamics[id].depth = 2;}
             }
         }
     }
@@ -136,8 +173,8 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
     for (id in data.units) {
         if (data.units.hasOwnProperty(id)) {
             obj = data.units[id];
-            if (gameObjects.units.hasOwnProperty(id)) { //update
-                let existingObj = gameObjects.units[id];
+            if (GameState.gameObjects.units.hasOwnProperty(id)) { //update
+                let existingObj = GameState.gameObjects.units[id];
                 existingObj.tx = obj[1];
                 existingObj.ty = obj[2];
                 existingObj.width = obj[5];
@@ -227,18 +264,18 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
                     //cameraY = -obj[2] + PIXIApp.screen.height / 2;
                     //cameraX = obj[1];
                     //cameraY = obj[2];
-                    cameraX = -obj[1] + PIXIApp.screen.width / 2;
-                    cameraY = -obj[2] + PIXIApp.screen.height / 2;
-                    pivotX = obj[1];
-                    pivotY = obj[2];
-                    mySnakeH = obj;
-                    mySnakeId = pId;
+                    GameState.cameraX = -obj[1] + PIXIApp.screen.width / 2;
+                    GameState.cameraY = -obj[2] + PIXIApp.screen.height / 2;
+                    GameState.pivotX = obj[1];
+                    GameState.pivotY = obj[2];
+                    GameState.mySnakeH = obj;
+                    GameState.mySnakeId = pId;
                     //console.log([cameraX, cameraY]);
                 }
             } else { // create
                 //console.log('CreateCircle ' + obj[0])
                 //console.log(obj)
-                //gameObjects.units[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
+                //GameState.gameObjects.units[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
                 let tempObject: any;
                 if (obj[14] === HEAD_EYES) {//Head/Eyes
                     tempObject = CreateCircle(headTexture, obj[1], obj[2], obj[3], 1);
@@ -282,16 +319,16 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
                 tempObject.TYPE = obj[0];
                 tempObject.rotation = obj[8];
 
-                gameObjects.units[id] = tempObject;//save
-                //if(obj[0] < 7){ gameObjects.units[id].depth = 1; }
-                //else {gameObjects.units[id].depth = 2;}
+                GameState.gameObjects.units[id] = tempObject;//save
+                //if(obj[0] < 7){ GameState.gameObjects.units[id].depth = 1; }
+                //else {GameState.gameObjects.units[id].depth = 2;}
             }
         }
     }
 
     //Debug
     //PIXIGfx.clear();
-    if (DEBUG) {
+    if (GameState.DEBUG) {
         drawDebugRect(data.dynamics)
         drawDebugRect(data.units)
 
