@@ -1,11 +1,12 @@
 import { Application, Assets, Sprite } from "pixi.js";
 import { setupWebsocket } from "./websocket";
 import { initAssets } from "./asset";
+import { onUpdate } from "./process";
+
+// Create a new application
+export const app = new Application();
 
 (async () => {
-  // Create a new application
-  const app = new Application();
-
   // Initialize the application
   await app.init({ background: "#1099bb", resizeTo: window });
 
@@ -13,7 +14,7 @@ import { initAssets } from "./asset";
   document.getElementById("pixi-container")!.appendChild(app.canvas);
 
   // await initAssets();
-  setupWebsocket();
+  setupWebsocket(onUpdate);
 
   app.ticker.add((time) => {
 

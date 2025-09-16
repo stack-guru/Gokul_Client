@@ -146,7 +146,7 @@ async function blobToArrayBuffer(blob: any) {
     }
 }
 
-export function setupWebsocket() {
+export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view: any) => void) {
     console.log('connecting websocket...')
     // Replace with your WebSocket server address (e.g., ws://localhost:8080)
     //socket = new WebSocket('ws://localhost:3000');
@@ -193,17 +193,13 @@ export function setupWebsocket() {
                             //var array = new Uint8Array([0x81, 0xA3, 0x66, 0x6F, 0x6F, 0xA3, 0x62, 0x61, 0x72]);
                             //var data = msgpack.decode(array);
 
-
-                            // onUpdate(update.id, update.x, update.y, update.view)
+                            onUpdate(update.id, update.x, update.y, update.view)
                         }
                         else { console.log("NO STATE") }
                     }
                     else {
-                        // onUpdate(d.id, d.x, d.y, d.view)
+                        onUpdate(d.id, d.x, d.y, d.view)
                     }
-                    //onUpdate(d.id, d.x, d.y, d.view)
-
-                    console.log('fast update')
                     break;
                 case "pong":
                     const receiveTime = Date.now();
