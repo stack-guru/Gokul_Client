@@ -1,6 +1,6 @@
 import { Texture, Sprite } from "pixi.js";
 import { app as PIXIApp } from "./main";
-import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect } from "./utils";
+import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect, calculateLerp } from "./utils";
 import {
     headTexture,
     eyesTexture,
@@ -24,7 +24,7 @@ function CreateCircle(texture: Texture, x: number, y: number, z: number, scale =
     // sprite.rotation = rot;//Math.PI / 4; // Rotate 45 degrees
     // sprite.zIndex = z; // Lower zIndex
     // //PIXIApp.stage.addChild(sprite);
-    // PIXICam.addChild(sprite);
+    // GameState.PIXICam.addChild(sprite);
 
     // sprite.REMOVE = 0;//flag to remove
     // return sprite;
@@ -80,6 +80,100 @@ function CleanGroupObj(Group: any, sGroup: any) {
         obj.destroy();
         delete Group[kk];//remove
     }
+}
+
+function process(delta: number) {
+    // for (let key in GameState.Objects) {
+    //     if (GameState.Objects.hasOwnProperty(key)) {
+    //         let obj = GameState.Objects[key];
+    //         //obj.rotation += 0.01; // Rotate the square
+    //     }
+    // }
+
+    // Get the global mouse position
+    const pos = PIXIApp.renderer.events.pointer.global;
+    let mx = Math.floor(pos.x)
+    let my = Math.floor(pos.x)
+
+    //Update Objects to tx/ty
+    let id, obj;
+    for (id in GameState.gameObjects.dynamics) {
+        if (GameState.gameObjects.dynamics.hasOwnProperty(id)) {
+            obj = GameState.gameObjects.dynamics[id];
+            obj.x = calculateLerp(obj.x, obj.tx, GameState.LERPP);
+            obj.y = calculateLerp(obj.y, obj.ty, GameState.LERPP);
+            //if(obj.TYPE > 8){ obj.angle += obj.SPIN; }
+        }
+    }
+
+    for (id in GameState.gameObjects.units) {
+        if (GameState.gameObjects.units.hasOwnProperty(id)) {
+            obj = GameState.gameObjects.units[id];
+            obj.x = calculateLerp(obj.x, obj.tx, GameState.LERPP);
+            obj.y = calculateLerp(obj.y, obj.ty, GameState.LERPP);
+            if (obj.EYES !== null) { obj.EYES.x = obj.x; obj.EYES.y = obj.y; }
+            let offset = obj.width / 4;
+            obj.onViewUpdate();
+            if (obj.EYES1 !== null) {
+                let rxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, -obj.width / 6);
+                obj.EYES1.x = rxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
+                obj.EYES1.y = rxy[1];//obj.y + Math.sin(obj.rotation - 0.85) * obj.height/2 * 0.60;
+                if (GameState.INPUT) {
+                    obj.EYES1.rotation = Math.atan2(-GameState.INPUT[1], -GameState.INPUT[0]);
+                }
+                obj.EYES1.onViewUpdate();
+
+            }
+            if (obj.EYES2 !== null) {
+                let lxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, obj.width / 6);
+                obj.EYES2.x = lxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
+                obj.EYES2.y = lxy[1];//obj.y + Math.sin(obj.rotation - 0.85) * obj.height/2 * 0.60;
+                if (GameState.INPUT) {
+                    obj.EYES2.rotation = Math.atan2(-GameState.INPUT[1], -GameState.INPUT[0]);
+                }
+                obj.EYES2.onViewUpdate();
+            }
+
+            obj.GLOW.x = obj.x;
+            obj.GLOW.y = obj.y;
+        }
+    }
+
+    //Clean up removed Ids
+    if (GameState.prevData) {
+        CleanGroupObj(GameState.gameObjects.dynamics, GameState.prevData.dynamics);
+        CleanGroupObj(GameState.gameObjects.units, GameState.prevData.units);
+    }
+    //GameState.PIXICam.x++
+    //GameState.PIXICam.x = calculateLerp(GameState.PIXICam.x, CX , 0.1);
+    //GameState.PIXICam.y = calculateLerp(GameState.PIXICam.y, CY , 0.1);
+    GameState.PIXICam.pivot.x = calculateLerp(GameState.PIXICam.pivot.x, GameState.pivotX, 0.1);
+    GameState.PIXICam.pivot.y = calculateLerp(GameState.PIXICam.pivot.y, GameState.pivotY, 0.1);
+    GameState.PIXICam.x = PIXIApp.screen.width / 2;
+    GameState.PIXICam.y = PIXIApp.screen.height / 2;
+
+    //console.log(CX);
+    //CX = -obj[1] + PIXIApp.screen.width / 2;
+    //CY = -obj[2] + PIXIApp.screen.height / 2;
+
+    //GameState.PIXICam.x = -player.x + app.screen.width / 2;
+    //GameState.PIXICam.y = -player.y + app.screen.height / 2;
+
+    let btk = 1024;//70;//background tilesize
+    let vx = GameState.PIXICam.pivot.x - GameState.ViewW / 2;
+    let vy = GameState.PIXICam.pivot.y - GameState.ViewH / 2;
+    let ox = Math.floor(vx / btk);
+    let oy = Math.floor(vy / btk);
+
+    //GameState.PIXITiledBK.tilePosition.x = GameState.PIXICam.x;//-GameState.PIXICam.left;
+    //GameState.PIXITiledBK.tilePosition.y = GameState.PIXICam.y;//-GameState.PIXICam.top;
+    GameState.PIXITiledBK.tilePosition.x = (ox * btk) - vx;//-GameState.PIXICam.left;
+    GameState.PIXITiledBK.tilePosition.y = (oy * btk) - vy;//-GameState.PIXICam.top;
+    GameState.PIXITiledBK.x = GameState.PIXICam.pivot.x - GameState.ViewW / 2;//GameState.PIXICam.left;
+    GameState.PIXITiledBK.y = GameState.PIXICam.pivot.y - GameState.ViewH / 2;//GameState.PIXICam.top;
+    //GameState.PIXITiledBK.width = innerWidth / GameState.PIXICam.scale.x;
+    //GameState.PIXITiledBK.height = innerHeight / GameState.PIXICam.scale.y;
+    //console.log([GameState.PIXICam.x, GameState.PIXICam.pivot.x, GameState.pivotX, (GameState.PIXICam.pivot.x - GameState.pivotX)])
 }
 
 export function onUpdate(pId: number, x: number, y: number, data: any) {
@@ -159,7 +253,7 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
                 GameState.gameObjects.dynamics[id].ADIR = randomNumber(1);
 
                 //Always glow
-                //GameState.gameObjects.dynamics[id].filters = [PIXICam.GLOW_FILTER];//ON GLOW
+                //GameState.gameObjects.dynamics[id].filters = [GameState.PIXICam.GLOW_FILTER];//ON GLOW
 
                 //GameState.gameObjects.dynamics[id].filters = [new PIXI.filters.BlurFilter(5)]; // Adjust blur amount
                 //GameState.gameObjects.dynamics[id].blendMode = PIXI.BLEND_MODES.ADD;
@@ -203,7 +297,7 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
                 existingObj.GLOW.rotation = obj[8];
 
                 if (obj[15] === 1) {// && existingObj.filters === null){
-                    //                    existingObj.filters = [PIXICam.GLOW_FILTER];//ON GLOW
+                    //                    existingObj.filters = [GameState.PIXICam.GLOW_FILTER];//ON GLOW
                     //console.log("ON")
                     //fade in / out GLOW
                     existingObj.GLOW.visible = true;

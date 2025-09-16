@@ -7,7 +7,7 @@ export function randomNumber(n: number) {
     return Math.floor(Math.random() * n);
 }
 
-export function MathLerp(a: number, b: number, t: number) {
+export function calculateLerp(a: number, b: number, t: number) {
     return a + (b - a) * t;
 }
 
