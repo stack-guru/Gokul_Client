@@ -1,11 +1,11 @@
-import { unpack, pack } from "msgpackr";
+import { unpack } from "msgpackr";
 import { GameState } from "./gameState";
 
 //REFERENCE - > https://victorzhou.com/blog/build-an-io-game-part-1/#7-client-state
-function initState() {
-    GameState.gameStart = 0;
-    GameState.firstServerTimestamp = 0;
-}
+// function initState() {
+//     GameState.gameStart = 0;
+//     GameState.firstServerTimestamp = 0;
+// }
 
 function processGameUpdate(update: any) {
     if (!GameState.firstServerTimestamp) {
@@ -58,13 +58,13 @@ function getCurrentState() {
         const r = (serverTime - baseUpdate.t) / (next.t - baseUpdate.t);
         //console.log(r)
 
-        let units: { [id: string]: any } = {};
+        const units: { [id: string]: any } = {};
         //function MathLerp(start, end, amt) { return (1-amt)*start+amt*end }
-        for (let id in baseUpdate.units) {
+        for (const id in baseUpdate.units) {
             if (baseUpdate.units.hasOwnProperty(id)) {
-                let obj = baseUpdate.units[id];
+                const obj = baseUpdate.units[id];
                 if (next.units.hasOwnProperty(id)) {
-                    let nobj = next.units[id]
+                    const nobj = next.units[id]
                     //x, y only
                     obj[1] = obj[1] + (nobj[1] - obj[1]) * r;
                     obj[2] = obj[2] + (nobj[2] - obj[2]) * r;
@@ -79,7 +79,6 @@ function getCurrentState() {
         }
         baseUpdate.units = units;//replaced lerped
 
-
         //LERPP = r;
         return baseUpdate;//full update
         //{
@@ -90,55 +89,55 @@ function getCurrentState() {
     }
 }
 
-function interpolateObject(object1: any, object2: any, ratio: any) {
-    if (!object2) {
-        return object1;
-    }
+// function interpolateObject(object1: any, object2: any, ratio: any) {
+//     if (!object2) {
+//         return object1;
+//     }
 
-    const interpolated: { [key: string]: any } = {};
-    Object.keys(object1).forEach(key => {
-        if (key === 'direction') {
-            interpolated[key] = interpolateDirection(object1[key], object2[key], ratio);
-        } else {
-            interpolated[key] = object1[key] + (object2[key] - object1[key]) * ratio;
-        }
-    });
-    return interpolated;
-}
+//     const interpolated: { [key: string]: any } = {};
+//     Object.keys(object1).forEach(key => {
+//         if (key === 'direction') {
+//             interpolated[key] = interpolateDirection(object1[key], object2[key], ratio);
+//         } else {
+//             interpolated[key] = object1[key] + (object2[key] - object1[key]) * ratio;
+//         }
+//     });
+//     return interpolated;
+// }
 
-function interpolateObjectArray(objects1: any, objects2: any, ratio: any) {
-    return objects1.map((o: any) => interpolateObject(o, objects2.find((o2: any) => o.id === o2.id), ratio));
-}
+// function interpolateObjectArray(objects1: any, objects2: any, ratio: any) {
+//     return objects1.map((o: any) => interpolateObject(o, objects2.find((o2: any) => o.id === o2.id), ratio));
+// }
 
 // Determines the best way to rotate (cw or ccw) when interpolating a direction.
 // For example, when rotating from -3 radians to +3 radians, we should really rotate from
 // -3 radians to +3 - 2pi radians.
-function interpolateDirection(d1: any, d2: any, ratio: any) {
-    const absD = Math.abs(d2 - d1);
-    if (absD >= Math.PI) {
-        // The angle between the directions is large - we should rotate the other way
-        if (d1 > d2) {
-            return d1 + (d2 + 2 * Math.PI - d1) * ratio;
-        } else {
-            return d1 - (d2 - 2 * Math.PI - d1) * ratio;
-        }
-    } else {
-        // Normal interp
-        return d1 + (d2 - d1) * ratio;
-    }
-}
+// function interpolateDirection(d1: any, d2: any, ratio: any) {
+//     const absD = Math.abs(d2 - d1);
+//     if (absD >= Math.PI) {
+//         // The angle between the directions is large - we should rotate the other way
+//         if (d1 > d2) {
+//             return d1 + (d2 + 2 * Math.PI - d1) * ratio;
+//         } else {
+//             return d1 - (d2 - 2 * Math.PI - d1) * ratio;
+//         }
+//     } else {
+//         // Normal interp
+//         return d1 + (d2 - d1) * ratio;
+//     }
+// }
 
-async function blobToArrayBuffer(blob: any) {
-    try {
-        const arrayBuffer = await blob.arrayBuffer();
-        return arrayBuffer;
-    } catch (error) {
-        console.error("Error converting Blob to ArrayBuffer:", error);
-        throw error;
-    }
-}
+// async function blobToArrayBuffer(blob: any) {
+//     try {
+//         const arrayBuffer = await blob.arrayBuffer();
+//         return arrayBuffer;
+//     } catch (error) {
+//         console.error("Error converting Blob to ArrayBuffer:", error);
+//         throw error;
+//     }
+// }
 
-export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view: any) => void) {
+export function setupWebsocket(onUpdate: (id: number, view: any) => void) {
     console.log('connecting websocket...')
     // Replace with your WebSocket server address (e.g., ws://localhost:8080)
     //GameState.socket = new WebSocket('ws://localhost:3000');
@@ -161,6 +160,7 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
     }, 1000); // Send a ping every few seconds
 
     GameState.socket.onopen = (event: any) => {
+        console.log('socket open: ', event);
         //messagesDiv.innerHTML += '<p>Connected to WebSocket server.</p>';
     };
 
@@ -168,12 +168,12 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
         try {
             const data = unpack(new Uint8Array(event.data));
             switch (data.type) {
-                case "fast_update":
+                case "fast_update": {
                     if (GameState.SKIP_MS) {
                         processGameUpdate(data);
 
                         //console.log(d.t);
-                        let update = getCurrentState();
+                        const update = getCurrentState();
                         if (update !== null) {
                             //console.log([d.id, d.x, d.y, d.view]);
 
@@ -184,20 +184,22 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
                             //var array = new Uint8Array([0x81, 0xA3, 0x66, 0x6F, 0x6F, 0xA3, 0x62, 0x61, 0x72]);
                             //var data = msgpack.decode(array);
 
-                            onUpdate(update.id, update.x, update.y, update.view)
+                            onUpdate(update.id, update.view)
                         }
                         else { console.log("NO STATE") }
                     }
                     else {
-                        onUpdate(data.id, data.x, data.y, data.view)
+                        onUpdate(data.id, data.view)
                     }
                     break;
-                case "pong":
+                }
+                case "pong": {
                     const receiveTime = Date.now();
                     const ping = receiveTime - data.timestamp;
                     //console.log(`Ping: ${ping}ms`);
                     GameState.PING = ping + "ms";
-                    break
+                    break;
+                }
             }
         } catch (err) {
             if (err instanceof RangeError && err.message.includes("BUFFER_SHORTAGE")) {
@@ -213,10 +215,12 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
     };
 
     GameState.socket.onclose = (event: any) => {
+        console.log('socket close: ', event)
         //messagesDiv.innerHTML += '<p>Disconnected from WebSocket server.</p>';
     };
 
     GameState.socket.onerror = (error: any) => {
+        console.log('socket error: ', error)
         //messagesDiv.innerHTML += `<p style="color: red;">WebSocket Error: ${error}</p>`;
     };
 

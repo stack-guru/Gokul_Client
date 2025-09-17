@@ -1,5 +1,5 @@
 import { Application } from "pixi.js";
-import { process, gameStart } from "./game";
+import { gameStart } from "./game";
 import { generateBackgroundSpots, drawBackground } from "./object/background";
 import { getRandomVibrantColor } from "./object/snake";
 import { Snake } from "./object/snake";

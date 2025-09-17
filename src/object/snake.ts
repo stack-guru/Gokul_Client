@@ -91,7 +91,7 @@ export class Snake {
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D, camera?: any, overrideColor?: string) {
+    draw(ctx: CanvasRenderingContext2D) {
         const t = Math.max(0, Math.min(1, this.boostBlend)); // clamp 0..1
 
         // ctx.save();
@@ -105,8 +105,8 @@ export class Snake {
         ctx.restore();
 
         // Eyes drawn fully opaque on top
-        const headW = this.size * 2.0;
-        this.drawEyes(ctx, headW);
+        // const headW = this.size * 2.0;
+        this.drawEyes(ctx);
     }
 
     drawCruiseLook(ctx: CanvasRenderingContext2D) {
@@ -257,7 +257,7 @@ export class Snake {
         ctx.restore();
     }
 
-    drawEyes(ctx: CanvasRenderingContext2D, headW: number) {
+    drawEyes(ctx: CanvasRenderingContext2D) {
         const head = this.segments[0];
         const hx = head.x - GameState.camera.x, hy = head.y - GameState.camera.y;
         const eyeDist = this.size * 0.60, eyeR = this.size * 0.44, pupilR = eyeR * 0.58;

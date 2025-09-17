@@ -26,9 +26,9 @@ export function adjustBrightnessRGB(red: number, green: number, blue: number, am
 }
 
 export function drawDebugRect(objs: any[]) {
-    for (let id in objs) {
+    for (const id in objs) {
         if (objs.hasOwnProperty(id)) {
-            let obj = objs[id];
+            // const obj = objs[id];
             //OBJS.units[id].tx = obj[1];
             //OBJS.units[id].ty = obj[2];
             //OBJS.units[id].width = obj[4];
@@ -36,8 +36,8 @@ export function drawDebugRect(objs: any[]) {
 
             //PIXIGfx.lineStyle(1, 0xFF0000); // 2px red border
             //PIXIGfx.setStrokeStyle(1, 0xFF0000); // 2px red border
-            let x: number = obj[1] - (obj[5] / 2);//centered box
-            let y: number = obj[2] - (obj[6] / 2);
+            // const x: number = obj[1] - (obj[5] / 2);//centered box
+            // const y: number = obj[2] - (obj[6] / 2);
             //PIXIGfx.drawRect(x,y, obj[5], obj[6]);
             //            PIXIGfx.Circle(obj[1], obj[2], obj[7]).stroke(0xFF0000).setStrokeStyle(1)
             //radius

@@ -8,8 +8,8 @@ import {
     eyesTexture,
     eyeTexture,
     bodyTexture1,
-    bodyTexture2,
-    bodyTexture3,
+    // bodyTexture2,
+    // bodyTexture3,
     bodyTexture4,
     bkTexture,
     glowTexture
@@ -45,8 +45,8 @@ function rotate_by_pivot(px: number, py: number, pr: number, ox: number, oy: num
 
 function CleanGroupObj(Group: any, sGroup: any) {
     //auto clean up removed units
-    let remove = [];
-    for (let uid in Group) {
+    const remove = [];
+    for (const uid in Group) {
         if (Group.hasOwnProperty(uid)) {
             if (sGroup.hasOwnProperty(parseInt(uid)) === false) {
                 remove.push(uid);
@@ -55,8 +55,8 @@ function CleanGroupObj(Group: any, sGroup: any) {
     }
 
     for (let i = 0; i < remove.length; i++) {
-        let kk = remove[i];
-        let obj = Group[kk];
+        const kk = remove[i];
+        const obj = Group[kk];
         if (obj.parent) {
             obj.parent.removeChild(obj);
         }
@@ -95,9 +95,9 @@ export function process() {
     // }
 
     // Get the global mouse position
-    const pos = PIXIApp.renderer.events.pointer.global;
-    let mx = Math.floor(pos.x)
-    let my = Math.floor(pos.x)
+    // const pos = PIXIApp.renderer.events.pointer.global;
+    // const mx = Math.floor(pos.x)
+    // const my = Math.floor(pos.x)
 
     //Update Objects to tx/ty
     let id, obj;
@@ -116,10 +116,10 @@ export function process() {
             obj.x = calculateLerp(obj.x, obj.tx, GameState.LERPP);
             obj.y = calculateLerp(obj.y, obj.ty, GameState.LERPP);
             if (obj.EYES !== null) { obj.EYES.x = obj.x; obj.EYES.y = obj.y; }
-            let offset = obj.width / 4;
+            // const offset = obj.width / 4;
             obj.onViewUpdate();
             if (obj.EYES1 !== null) {
-                let rxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, -obj.width / 6);
+                const rxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, -obj.width / 6);
                 obj.EYES1.x = rxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
                 obj.EYES1.y = rxy[1];//obj.y + Math.sin(obj.rotation - 0.85) * obj.height/2 * 0.60;
                 if (GameState.INPUT) {
@@ -129,7 +129,7 @@ export function process() {
 
             }
             if (obj.EYES2 !== null) {
-                let lxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, obj.width / 6);
+                const lxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, obj.width / 6);
                 obj.EYES2.x = lxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
                 obj.EYES2.y = lxy[1];//obj.y + Math.sin(obj.rotation - 0.85) * obj.height/2 * 0.60;
                 if (GameState.INPUT) {
@@ -163,11 +163,11 @@ export function process() {
     //GameState.PIXICam.x = -player.x + app.screen.width / 2;
     //GameState.PIXICam.y = -player.y + app.screen.height / 2;
 
-    let btk = 1024;//70;//background tilesize
-    let vx = GameState.PIXICam.pivot.x - GameState.ViewW / 2;
-    let vy = GameState.PIXICam.pivot.y - GameState.ViewH / 2;
-    let ox = Math.floor(vx / btk);
-    let oy = Math.floor(vy / btk);
+    const btk = 1024;//70;//background tilesize
+    const vx = GameState.PIXICam.pivot.x - GameState.ViewW / 2;
+    const vy = GameState.PIXICam.pivot.y - GameState.ViewH / 2;
+    const ox = Math.floor(vx / btk);
+    const oy = Math.floor(vy / btk);
 
     //GameState.PIXITiledBK.tilePosition.x = GameState.PIXICam.x;//-GameState.PIXICam.left;
     //GameState.PIXITiledBK.tilePosition.y = GameState.PIXICam.y;//-GameState.PIXICam.top;
@@ -180,7 +180,7 @@ export function process() {
     //console.log([GameState.PIXICam.x, GameState.PIXICam.pivot.x, GameState.pivotX, (GameState.PIXICam.pivot.x - GameState.pivotX)])
 }
 
-export function onUpdate(pId: number, x: number, y: number, data: any) {
+export function onUpdate(pId: number, data: any) {
     GameState.prevData = data; //SAVE
     let obj, id;
     const fspeed = 0.1;
@@ -220,7 +220,7 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
             // console.log('dynamics obj = ', obj);
 
             if (GameState.gameObjects.dynamics.hasOwnProperty(id) && GameState.gameObjects.dynamics[id]) {
-                let foodObj = GameState.gameObjects.dynamics[id];
+                const foodObj = GameState.gameObjects.dynamics[id];
 
                 foodObj.tx = obj[1];
                 foodObj.ty = obj[2];
@@ -274,12 +274,12 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
         }
     }
 
-    let gspeed = 0.1;
+    // const gspeed = 0.1;
     for (id in data.units) {
         if (data.units.hasOwnProperty(id)) {
             obj = data.units[id];
             if (GameState.gameObjects.units.hasOwnProperty(id)) { //update
-                let existingObj = GameState.gameObjects.units[id];
+                const existingObj = GameState.gameObjects.units[id];
                 existingObj.tx = obj[1];
                 existingObj.ty = obj[2];
                 existingObj.width = obj[5];
@@ -437,7 +437,7 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
         drawDebugRect(data.dynamics)
         drawDebugRect(data.units)
 
-        let CellSize = 256;//Match server
+        // const CellSize = 256;//Match server
         //        PIXIGfx.lineStyle(2, 0x00FF00); // 2px red border
         //let vwh = (CellSize * 2) + CellSize;
         //PIXIGfx.drawRect(pivotX - vwh/2,pivotY - vwh/2, vwh, vwh);
@@ -648,7 +648,7 @@ async function setupGraphic() {
 
 
     // Create the background sprite with a basic white texture
-    let bg = new Sprite(Texture.WHITE);
+    const bg = new Sprite(Texture.WHITE);
     // Set it to fill the screen
     bg.width = GameState.mapWH;//PIXIApp.screen.width;
     bg.height = GameState.mapWH;//PIXIApp.screen.height;
@@ -657,18 +657,18 @@ async function setupGraphic() {
     // Add a click handler
     bg.interactive = true;
     bg.on('pointerdown', function (event) {
-        let mx = Math.floor(event.data.global.x)
-        let my = Math.floor(event.data.global.y)
+        const mx = Math.floor(event.data.global.x)
+        const my = Math.floor(event.data.global.y)
         GameState.mDown = 1;
         if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
-            let ox = PIXIApp.screen.width / 2 - mx;
-            let oy = PIXIApp.screen.height / 2 - my;
+            const ox = PIXIApp.screen.width / 2 - mx;
+            const oy = PIXIApp.screen.height / 2 - my;
             GameState.INPUT = [ox, oy, GameState.mDown];
         }
     });
     bg.on('pointermove', function (event) {
-        let mx = Math.floor(event.data.global.x)
-        let my = Math.floor(event.data.global.y)
+        const mx = Math.floor(event.data.global.x)
+        const my = Math.floor(event.data.global.y)
         if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
             //console.log(`Mouse X: ${mx}, Mouse Y: ${my}`);
             let dc: any = Object.keys(GameState.gameObjects.dynamics).length;
@@ -677,8 +677,8 @@ async function setupGraphic() {
                 dc = dc + "/" + Object.keys(GameState.prevData.dynamics).length;
                 uc = uc + "/" + Object.keys(GameState.prevData.units).length;
             }
-            let ox = PIXIApp.screen.width / 2 - mx;
-            let oy = PIXIApp.screen.height / 2 - my;
+            const ox = PIXIApp.screen.width / 2 - mx;
+            const oy = PIXIApp.screen.height / 2 - my;
             let str = "[ " + mx + ", " + my + " ] dcount: " + dc + " ucount: " + uc
             str = str + " offset: " + ox + "," + oy;
             str = str + " Zoom: " + (GameState.PIXICam.scale.x).toFixed(2);
@@ -693,24 +693,24 @@ async function setupGraphic() {
 
     });
     bg.on('pointerup', function (event) {
-        let mx = Math.floor(event.data.global.x)
-        let my = Math.floor(event.data.global.y)
+        const mx = Math.floor(event.data.global.x)
+        const my = Math.floor(event.data.global.y)
         console.log(`Mouse X: ${mx}, Mouse Y: ${my}`);
         GameState.mDown = 0;
         if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
-            let ox = PIXIApp.screen.width / 2 - mx;
-            let oy = PIXIApp.screen.height / 2 - my;
+            const ox = PIXIApp.screen.width / 2 - mx;
+            const oy = PIXIApp.screen.height / 2 - my;
             GameState.INPUT = [ox, oy, GameState.mDown];
         }
     });
     bg.on('pointerout', function (event) {
-        let mx = Math.floor(event.data.global.x)
-        let my = Math.floor(event.data.global.y)
+        const mx = Math.floor(event.data.global.x)
+        const my = Math.floor(event.data.global.y)
         console.log(`OUT Mouse X: ${mx}, Mouse Y: ${my}`);
         GameState.mDown = 0;
         if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
-            let ox = PIXIApp.screen.width / 2 - mx;
-            let oy = PIXIApp.screen.height / 2 - my;
+            const ox = PIXIApp.screen.width / 2 - mx;
+            const oy = PIXIApp.screen.height / 2 - my;
             GameState.INPUT = [ox, oy, GameState.mDown];
         }
     });
@@ -752,7 +752,7 @@ async function setupGraphic() {
     //Draws it here
     GameState.PIXICam.addChild(GameState.PIXIGfx);
 
-    let textStyle = new TextStyle({
+    const textStyle = new TextStyle({
         fontFamily: 'Arial',
         fontSize: 14, fill: 0xffffff,
         align: 'center',
@@ -778,12 +778,12 @@ async function setupGraphic() {
         }
     }, 100);
 
-    PIXIApp.ticker.add((delta) => {
+    PIXIApp.ticker.add(() => {
         process();
     });
 
     // Assuming 'app.stage' is your main container
-    let zoomFactor = 2;
+    // const zoomFactor = 2;
     //PIXIApp.stage.scale.x *= zoomFactor;
     //PIXIApp.stage.scale.y *= zoomFactor;
 

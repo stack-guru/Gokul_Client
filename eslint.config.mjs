@@ -8,13 +8,16 @@ export default tseslint.config(
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
-      prettier,
+      // prettier,
     ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
     },
-    rules: {},
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-prototype-builtins": "off"
+    },
   },
 );
