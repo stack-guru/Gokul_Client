@@ -18,18 +18,18 @@ import { HEAD_EYES } from "./constant";
 import { GameState } from "./gameState";
 
 function CreateCircle(texture: Texture, x: number, y: number, z: number, scale = 1, rot = 0) {
-    // gId++;
-    // const sprite = new Sprite(texture);
-    // sprite.position.set(x, y); // Set x and y coordinates
-    // sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
-    // sprite.scale.set(scale); // Double the size
-    // sprite.rotation = rot;//Math.PI / 4; // Rotate 45 degrees
-    // sprite.zIndex = z; // Lower zIndex
-    // //PIXIApp.stage.addChild(sprite);
-    // GameState.PIXICam.addChild(sprite);
+    GameState.gId++;
+    const sprite = new Sprite(texture);
+    sprite.position.set(x, y); // Set x and y coordinates
+    sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
+    sprite.scale.set(scale); // Double the size
+    sprite.rotation = rot;//Math.PI / 4; // Rotate 45 degrees
+    sprite.zIndex = z; // Lower zIndex
+    //PIXIApp.stage.addChild(sprite);
+    GameState.PIXICam.addChild(sprite);
 
     // sprite.REMOVE = 0;//flag to remove
-    // return sprite;
+    return sprite;
 }
 
 function rotate_by_pivot(px: number, py: number, pr: number, ox: number, oy: number) {//sets location by rotating around a different pivot point
@@ -79,7 +79,9 @@ function CleanGroupObj(Group: any, sGroup: any) {
             obj.GLOW.destroy();
         }
 
-        obj.destroy();
+        if (obj && typeof (obj as any).destroy === "function") {
+            obj.destroy();
+        }
         delete Group[kk];//remove
     }
 }
@@ -212,10 +214,16 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
     for (id in data.dynamics) {
         if (data.dynamics.hasOwnProperty(id)) {
             obj = data.dynamics[id];
+            if (!GameState.gameObjects.dynamics[id]) {
+                GameState.gameObjects.dynamics[id] = {}; // or create the right object type
+            }
+
             if (GameState.gameObjects.dynamics.hasOwnProperty(id)) {
                 let fObj = GameState.gameObjects.dynamics[id];
-                fObj.tx = obj[1]; fObj.ty = obj[2];
-                fObj.width = obj[5]; fObj.height = obj[6];
+                fObj.tx = obj[1];
+                fObj.ty = obj[2];
+                fObj.width = obj[5];
+                fObj.height = obj[6];
 
                 //fade in / out
                 if (fObj.ADIR === 0) {

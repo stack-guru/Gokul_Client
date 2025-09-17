@@ -166,12 +166,11 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
 
     GameState.socket.onmessage = async (event: any) => {
         try {
-            let d = unpack(new Uint8Array(event.data));
-
-            switch (d.type) {
+            const data = unpack(new Uint8Array(event.data));
+            switch (data.type) {
                 case "fast_update":
                     if (GameState.SKIP_MS) {
-                        processGameUpdate(d);
+                        processGameUpdate(data);
 
                         //console.log(d.t);
                         let update = getCurrentState();
@@ -190,12 +189,12 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
                         else { console.log("NO STATE") }
                     }
                     else {
-                        onUpdate(d.id, d.x, d.y, d.view)
+                        onUpdate(data.id, data.x, data.y, data.view)
                     }
                     break;
                 case "pong":
                     const receiveTime = Date.now();
-                    const ping = receiveTime - d.timestamp;
+                    const ping = receiveTime - data.timestamp;
                     //console.log(`Ping: ${ping}ms`);
                     GameState.PING = ping + "ms";
                     break
