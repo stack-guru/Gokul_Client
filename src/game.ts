@@ -82,7 +82,7 @@ function CleanGroupObj(Group: any, sGroup: any) {
     }
 }
 
-function process(delta: number) {
+export function process() {
     // for (let key in GameState.Objects) {
     //     if (GameState.Objects.hasOwnProperty(key)) {
     //         let obj = GameState.Objects[key];

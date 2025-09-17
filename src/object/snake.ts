@@ -18,7 +18,7 @@ export function getRandomVibrantColor() {
     return hslToHex(h, 78, 52);
 }
 
-class Snake {
+export class Snake {
     segments: SnakeSegment[];
     baseColor: string;
     color: string;
@@ -91,7 +91,7 @@ class Snake {
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D, camera: any, overrideColor: string) {
+    draw(ctx: CanvasRenderingContext2D, camera?: any, overrideColor?: string) {
         const t = Math.max(0, Math.min(1, this.boostBlend)); // clamp 0..1
 
         // ctx.save();

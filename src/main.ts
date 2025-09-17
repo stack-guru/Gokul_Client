@@ -1,9 +1,11 @@
-import { Application, Assets, Sprite } from "pixi.js";
+import { Application } from "pixi.js";
 import { setupWebsocket } from "./websocket";
 import { initAssets } from "./asset";
-import { onUpdate, setupGraphic } from "./game";
+import { onUpdate, setupGraphic, process } from "./game";
 import { generateBackgroundSpots, drawBackground } from "./object/background";
 import { getRandomVibrantColor } from "./object/snake";
+import { Snake } from "./object/snake";
+import { Food } from "./object/food";
 
 // Create a new application
 export const app = new Application();
@@ -24,14 +26,20 @@ export const app = new Application();
 
     generateBackgroundSpots();
     drawBackground(canvas, ctx);
+
+    const randomColor = getRandomVibrantColor();
+    const snake = new Snake(600, 256, randomColor); // used ONLY for drawing reference defaults
+    snake.draw(ctx);
+
+    const food = new Food(50, 50);
+    food.draw(ctx);
   }
-  const randomColor = getRandomVibrantColor();
 
   await setupGraphic();
   await initAssets();
   setupWebsocket(onUpdate);
 
   app.ticker.add((time) => {
-
+    process()
   });
 })();
