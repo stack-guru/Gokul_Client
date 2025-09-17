@@ -214,37 +214,38 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
     for (id in data.dynamics) {
         if (data.dynamics.hasOwnProperty(id)) {
             obj = data.dynamics[id];
-            if (!GameState.gameObjects.dynamics[id]) {
-                GameState.gameObjects.dynamics[id] = {}; // or create the right object type
-            }
+            // if (!GameState.gameObjects.dynamics[id]) {
+            //     GameState.gameObjects.dynamics[id] = {}; // or create the right object type
+            // }
+            // console.log('dynamics obj = ', obj);
 
-            if (GameState.gameObjects.dynamics.hasOwnProperty(id)) {
-                let fObj = GameState.gameObjects.dynamics[id];
-                fObj.tx = obj[1];
-                fObj.ty = obj[2];
-                fObj.width = obj[5];
-                fObj.height = obj[6];
+            if (GameState.gameObjects.dynamics.hasOwnProperty(id) && GameState.gameObjects.dynamics[id]) {
+                let foodObj = GameState.gameObjects.dynamics[id];
+
+                foodObj.tx = obj[1];
+                foodObj.ty = obj[2];
+                foodObj.width = obj[5];
+                foodObj.height = obj[6];
 
                 //fade in / out
-                if (fObj.ADIR === 0) {
-                    fObj.alpha -= fspeed;
-                    if (fObj.alpha < 0.2) {
-                        fObj.alpha = 0.2;
-                        fObj.ADIR = 1;
+                if (foodObj.ADIR === 0) {
+                    foodObj.alpha -= fspeed;
+                    if (foodObj.alpha < 0.2) {
+                        foodObj.alpha = 0.2;
+                        foodObj.ADIR = 1;
                     }
                 } else {
-                    fObj.alpha += fspeed;
-                    if (fObj.alpha > 1) {
-                        fObj.alpha = 1;
-                        fObj.ADIR = 0;
+                    foodObj.alpha += fspeed;
+                    if (foodObj.alpha > 1) {
+                        foodObj.alpha = 1;
+                        foodObj.ADIR = 0;
                     }
                 }
-            }
-            else {
+            } else {
                 //console.log('CreateCircle ' + obj[0])
                 //console.log(obj)
                 //GameState.gameObjects.dynamics[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
-                GameState.gameObjects.dynamics[id] = CreateCircle(headTexture, obj[1], obj[2], obj[3], 1);
+                GameState.gameObjects.dynamics[id] = CreateCircle(bodyTexture1, obj[1], obj[2], obj[3], 1);
                 //let COLORS =  ["f5e0dc", "f2cdcd", "f5c2e7", "cba6f7", "f38ba8", "eba0ac", "fab387", "f9e2af",
                 //"a6e3a1", "94e2d5", "89dceb", "74c7ec", "89b4fa", "b4befe"];
                 //COLORS = ['EAB999', '00ff88', 'ff4400', '0088ff', 'aa44ff', 'ffaa00']
