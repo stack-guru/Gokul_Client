@@ -11,13 +11,13 @@ export let bkTexture: Texture;
 export let glowTexture: Texture;
 
 export async function initAssets() {
-    headTexture = await Assets.load('img/ch.png');//Head
-    eyesTexture = await Assets.load('img/c0.png');//Eyes
-    eyeTexture = await Assets.load('img/c0b.png');//eyes for player
-    bodyTexture1 = await Assets.load('img/c1.png');
-    bodyTexture2 = await Assets.load('img/c2.png');
-    bodyTexture3 = await Assets.load('img/c3.png');
-    bodyTexture4 = await Assets.load('img/c4.png');
-    bkTexture = await Assets.load('img/bk.png');
-    glowTexture = await Assets.load('img/c4g.png');
+    headTexture = await Assets.load('assets/img/ch.png');//Head
+    eyesTexture = await Assets.load('assets/img/c0.png');//Eyes
+    eyeTexture = await Assets.load('assets/img/c0b.png');//eyes for player
+    bodyTexture1 = await Assets.load('assets/img/c1.png');
+    bodyTexture2 = await Assets.load('assets/img/c2.png');
+    bodyTexture3 = await Assets.load('assets/img/c3.png');
+    bodyTexture4 = await Assets.load('assets/img/c4.png');
+    bkTexture = await Assets.load('assets/img/bk.png');
+    glowTexture = await Assets.load('assets/img/c4g.png');
 }
