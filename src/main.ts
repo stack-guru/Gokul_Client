@@ -1,7 +1,7 @@
 import { Application, Assets, Sprite } from "pixi.js";
 import { setupWebsocket } from "./websocket";
 import { initAssets } from "./asset";
-import { onUpdate } from "./process";
+import { onUpdate, setupGraphic } from "./game";
 
 // Create a new application
 export const app = new Application();
@@ -13,6 +13,7 @@ export const app = new Application();
   // Append the application canvas to the document body
   document.getElementById("pixi-container")!.appendChild(app.canvas);
 
+  await setupGraphic();
   await initAssets();
   setupWebsocket(onUpdate);
 

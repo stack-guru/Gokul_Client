@@ -1,6 +1,7 @@
 import { GameObjects } from "./type";
 
 export const GameState = {
+    gData: {} as any,
     gId: 0,
     prevData: null as any,
     gameObjects: {
@@ -10,7 +11,7 @@ export const GameState = {
     } as GameObjects,
     // Objects: {},
     cameraX: 0, //camera target
-    INPUT: null,
+    INPUT: null as any,
     cameraY: 0,
     pivotX: 0,
     pivotY: 0,
@@ -20,7 +21,17 @@ export const GameState = {
     DEBUG: false,
     ViewW: 2048,
     ViewH: 2048,
-    MapWH: 10000,
+    mapWH: 10000,
+    mDown: 0,
+    PING: 0 as any,
+    SKIP_MS: false,
+    RENDER_DELAY: 100,
+    firstServerTimestamp: 0,
+    gameStart: 0,
+    gameUpdates: [] as any[],
+    socket: null as any,
     PIXICam: null as any,
     PIXITiledBK: null as any,
+    PIXI_Viewport: null as any,
+    PIXIGfx: null as any,
 }

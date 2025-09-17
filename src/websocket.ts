@@ -1,44 +1,36 @@
 import { unpack, pack } from "msgpackr";
-
-let SKIP_MS = false;//Debug
-let PING: any = 0;
+import { GameState } from "./gameState";
 
 //REFERENCE - > https://victorzhou.com/blog/build-an-io-game-part-1/#7-client-state
-const RENDER_DELAY = 100;
-
-const gameUpdates: any[] = [];
-let gameStart = 0;
-let firstServerTimestamp = 0;
-
 function initState() {
-    gameStart = 0;
-    firstServerTimestamp = 0;
+    GameState.gameStart = 0;
+    GameState.firstServerTimestamp = 0;
 }
 
 function processGameUpdate(update: any) {
-    if (!firstServerTimestamp) {
-        firstServerTimestamp = update.t;
-        gameStart = Date.now();
+    if (!GameState.firstServerTimestamp) {
+        GameState.firstServerTimestamp = update.t;
+        GameState.gameStart = Date.now();
     }
-    gameUpdates.push(update);
+    GameState.gameUpdates.push(update);
 
     // Keep only one game update before the current server time
     const base = getBaseUpdate();
     if (base > 0) {
-        gameUpdates.splice(0, base);
+        GameState.gameUpdates.splice(0, base);
     }
 }
 
 function currentServerTime() {
-    return firstServerTimestamp + (Date.now() - gameStart) - RENDER_DELAY;
+    return GameState.firstServerTimestamp + (Date.now() - GameState.gameStart) - GameState.RENDER_DELAY;
 }
 
 // Returns the index of the base update, the first game update before
 // current server time, or -1 if N/A.
 function getBaseUpdate() {
     const serverTime = currentServerTime();
-    for (let i = gameUpdates.length - 1; i >= 0; i--) {
-        if (gameUpdates[i].t <= serverTime) {
+    for (let i = GameState.gameUpdates.length - 1; i >= 0; i--) {
+        if (GameState.gameUpdates[i].t <= serverTime) {
             return i;
         }
     }
@@ -46,7 +38,7 @@ function getBaseUpdate() {
 }
 
 function getCurrentState() {
-    if (!firstServerTimestamp) {
+    if (!GameState.firstServerTimestamp) {
         //return {};
         return null;
     }
@@ -57,12 +49,12 @@ function getCurrentState() {
     // If base is the most recent update we have, use its state.
     // Else, interpolate between its state and the state of (base + 1).
     if (base < 0) {
-        return gameUpdates[gameUpdates.length - 1];
-    } else if (base === gameUpdates.length - 1) {
-        return gameUpdates[base];
+        return GameState.gameUpdates[GameState.gameUpdates.length - 1];
+    } else if (base === GameState.gameUpdates.length - 1) {
+        return GameState.gameUpdates[base];
     } else {
-        const baseUpdate = gameUpdates[base];
-        const next = gameUpdates[base + 1];
+        const baseUpdate = GameState.gameUpdates[base];
+        const next = GameState.gameUpdates[base + 1];
         const r = (serverTime - baseUpdate.t) / (next.t - baseUpdate.t);
         //console.log(r)
 
@@ -149,7 +141,7 @@ async function blobToArrayBuffer(blob: any) {
 export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view: any) => void) {
     console.log('connecting websocket...')
     // Replace with your WebSocket server address (e.g., ws://localhost:8080)
-    //socket = new WebSocket('ws://localhost:3000');
+    //GameState.socket = new WebSocket('ws://localhost:3000');
     let HOST = "ws://localhost:3000";//default
     if (location.hostname !== "localhost") {
         HOST = "ws://" + location.hostname + "/ws/";//use HTTP for speed not HTTPS
@@ -160,25 +152,25 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
     //}
 
     console.log(HOST)
-    const socket = new WebSocket(HOST);
-    socket.binaryType = "arraybuffer";
+    GameState.socket = new WebSocket(HOST);
+    GameState.socket.binaryType = "arraybuffer";
 
     setInterval(() => {
         const sendTime = Date.now();
-        socket.send(JSON.stringify({ type: "ping", timestamp: sendTime }));
+        GameState.socket.send(JSON.stringify({ type: "ping", timestamp: sendTime }));
     }, 1000); // Send a ping every few seconds
 
-    socket.onopen = (event) => {
+    GameState.socket.onopen = (event: any) => {
         //messagesDiv.innerHTML += '<p>Connected to WebSocket server.</p>';
     };
 
-    socket.onmessage = async (event) => {
+    GameState.socket.onmessage = async (event: any) => {
         try {
             let d = unpack(new Uint8Array(event.data));
 
             switch (d.type) {
                 case "fast_update":
-                    if (SKIP_MS) {
+                    if (GameState.SKIP_MS) {
                         processGameUpdate(d);
 
                         //console.log(d.t);
@@ -205,7 +197,7 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
                     const receiveTime = Date.now();
                     const ping = receiveTime - d.timestamp;
                     //console.log(`Ping: ${ping}ms`);
-                    PING = ping + "ms";
+                    GameState.PING = ping + "ms";
                     break
             }
         } catch (err) {
@@ -221,11 +213,11 @@ export function setupWebsocket(onUpdate: (id: number, x: number, y: number, view
         }
     };
 
-    socket.onclose = (event) => {
+    GameState.socket.onclose = (event: any) => {
         //messagesDiv.innerHTML += '<p>Disconnected from WebSocket server.</p>';
     };
 
-    socket.onerror = (error) => {
+    GameState.socket.onerror = (error: any) => {
         //messagesDiv.innerHTML += `<p style="color: red;">WebSocket Error: ${error}</p>`;
     };
 

@@ -1,4 +1,4 @@
-import { Texture, Sprite } from "pixi.js";
+import { Texture, Sprite, Container, TilingSprite, Graphics, TextStyle, Text } from "pixi.js";
 import { app as PIXIApp } from "./main";
 import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect, calculateLerp } from "./utils";
 import {
@@ -439,4 +439,359 @@ export function onUpdate(pId: number, x: number, y: number, data: any) {
     //PIXIGfx.lineStyle(50, 0xFF0000); // 2px red border
     //PIXIGfx.drawRect(0,0, MapWH, MapWH);
     //PIXIGfx.circle(MapWH/2,MapWH/2,MapWH/2).fill(0xFF0000).lineStyle(50)
+}
+
+function onResize() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    fitFIX(true, GameState.PIXICam, screenWidth, screenHeight, 1024, 1024)
+
+    if (GameState.PIXICam) {
+        //PIXICam.resize(screenWidth, screenHeight); // Update the viewport's size
+        //PIXICam.fit(); // Re-apply fitting to the content
+    }
+    //PIXICam.fit();
+    if (GameState.PIXI_Viewport) {
+        //PIXIApp.width = screenWidth;
+        //PIXIApp.height = screenHeight;
+
+        //PIXI_Viewport.resize(screenWidth, screenHeight); // Update the viewport's size
+        //PIXI_Viewport.fit(); // Re-apply fitting to the content
+
+        //PIXI_Viewport.x = window.innerWidth /2
+        //PIXI_Viewport.y = window.innerHeight /2
+
+        //PIXI_Viewport.x = PIXIApp.width / 2;
+        //PIXI_Viewport.y = PIXIApp.height / 2;
+        //PIXI_Viewport.pivot.x = 0;
+        //PIXI_Viewport.pivot.y = 0;
+    }
+}
+
+function fitFIX(center: boolean, stage: any, screenWidth: number, screenHeight: number, virtualWidth: number, virtualHeight: number) {
+    stage.scale.x = screenWidth / virtualWidth
+    stage.scale.y = screenHeight / virtualHeight
+
+    if (stage.scale.x < stage.scale.y) {
+        stage.scale.y = stage.scale.x
+    } else {
+        stage.scale.x = stage.scale.y
+    }
+
+    const virtualWidthInScreenPixels = virtualWidth * stage.scale.x
+    const virtualHeightInScreenPixels = virtualHeight * stage.scale.y
+    const centerXInScreenPixels = screenWidth * 0.5;
+    const centerYInScreenPixels = screenHeight * 0.5;
+
+    if (center) {
+        stage.position.x = centerXInScreenPixels;
+        stage.position.y = centerYInScreenPixels;
+    } else {
+        stage.position.x = centerXInScreenPixels - virtualWidthInScreenPixels * 0.5;
+        stage.position.y = centerYInScreenPixels - virtualHeightInScreenPixels * 0.5;
+    }
+}
+
+export async function setupGraphic() {
+    // 1. Create a PixiJS Application
+    //PIXIApp = new PIXI.Application();
+    //await PIXIApp.init({ background: "#1099bb", resizeTo: window });
+
+    // Append the application canvas to the document body
+    //document.getElementById("pixi-container")!.appendChild(app.canvas);
+
+    window.addEventListener('resize', onResize);
+    //    window.addEventListener('resize', onResize);
+
+    await PIXIApp.init({
+        preference: 'webgl', // 'webgl' or 'webgpu'
+        width: GameState.ViewW,//window.innerWidth,
+        height: GameState.ViewH,//window.innerHeight,
+        backgroundColor: 0x000000,
+        antialias: true, // Smooth pixelated edges
+        resizeTo: window, // Auto-resize target
+    });
+
+    console.log(PIXIApp.renderer)
+    //document.body.appendChild(PIXIApp.canvas);
+    document.getElementById("pixi-container")?.appendChild(PIXIApp.canvas);
+
+
+    // create viewport
+
+
+    // activate plugins
+    //PIXI_Viewport.drag().pinch().wheel().decelerate();
+
+    // add a red box
+    //const sprite = PIXI_Viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+    //sprite.tint = 0xff0000;
+    //sprite.width = sprite.height = 100;
+    //sprite.position.set(100, 100);
+
+    // create viewport
+    //const viewport = new pixi_viewport.Viewport({
+    //screenWidth: window.innerWidth,
+    //screenHeight: window.innerHeight,
+    //worldWidth: 1000,
+    //worldHeight: 1000,
+    //events: app.renderer.events, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    //});
+
+    // add the viewport to the stage
+    //app.stage.addChild(viewport);
+
+    //viewport.drag().pinch().wheel().decelerate();
+
+    //const sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+    //sprite.tint = 0xff0000;
+    //sprite.width = sprite.height = 100;
+    //sprite.position.set(100, 100);
+    /*
+        await PIXIApp.init(
+            {
+                width: ViewW ,//window.innerWidth,
+                height: ViewH,//window.innerHeight,
+                backgroundColor: 0x000000,
+                antialias: true, // Smooth pixelated edges
+                preference: 'webgl', // 'webgl' or 'webgpu'
+                resizeTo: window, // Auto-resize target
+                //autoDensity: true,
+                //resolution: window.devicePixelRatio
+            }
+        )*/
+
+    //texture_h = PIXI.Texture.from('img/ch.png');//Head
+    //texture0 = PIXI.Texture.from('img/c0.png');//Eyes
+    //tex_eye = PIXI.Texture.from('img/c0b.png');//eyes for player
+    //texture1 = PIXI.Texture.from('img/c1.png');
+    //texture2 = PIXI.Texture.from('img/c2.png');
+    //texture3 = PIXI.Texture.from('img/c3.png');
+    //texture4 = PIXI.Texture.from('img/c4.png');
+    //texture_bk = PIXI.Texture.from('img/bk.png');
+    //tex_glow = PIXI.Texture.from('img/c4g.png');
+
+    //document.body.appendChild(PIXIApp.view);
+    //document.getElementById("pixi-container").appendChild(PIXIApp.canvas);
+
+    GameState.PIXICam = new Container();
+    /*
+    PIXICam = new PIXI_VP.Viewport({
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        worldWidth: 1024,//default view size
+        worldHeight: 1024,
+        events: PIXIApp.renderer.events, // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    });*/
+
+    // add the viewport to the stage
+    //PIXIApp.stage.addChild(PIXI_Viewport);
+
+    PIXIApp.stage.addChild(GameState.PIXICam);
+    //PIXI_Viewport.addChild(PIXICam);
+    //PIXICam.scale.set(2);//Default
+    GameState.PIXICam.sortableChildren = true;
+
+    //Viewport - Autoscale
+    //PIXI_Viewport = new PIXI_VP.Viewport(
+    //{
+    //screenWidth: window.innerWidth,
+    //screenHeight: window.innerHeight,
+    //worldWidth: 10000,//ViewW,
+    //worldHeight: 10000,//ViewH,
+    //events: PIXIApp.renderer.events,
+    // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    //}
+    //);
+
+    // add the viewport to the stage
+    //    PIXIApp.stage.addChild(PIXI_Viewport);
+
+    // activate plugins
+    //    PIXI_Viewport.drag().pinch().wheel().decelerate();
+
+    // add a red box
+    //const sprite = viewport.addChild(new PIXI.Sprite(PIXI.Texture.WHITE));
+    //sprite.tint = 0xff0000;
+    //sprite.width = sprite.height = 100;
+    //sprite.position.set(100, 100);
+
+
+    //Filter Game
+    //    PIXICam.GLOW_FILTER = new PIXI.filters.AdjustmentFilter({
+    //        brightness: 1.2, // Increase brightness by 20%
+    //contrast: 0.8,   // Decrease contrast by 20%
+    //        saturation: 1.2  // Increase saturation by 50%
+    //    });
+
+    /*
+        PIXICam.GLOW_FILTER = new PIXI.filters.GlowFilter({
+            distance: 35,       // The distance of the glow
+            outerStrength: 1,   // The strength of the outer glow
+            innerStrength: 0,   // The strength of the inner glow (optional)
+            color: 0xFFFFFF,    // The color of the glow (e.g., gold)
+            quality: 0.1        // The quality of the glow (higher is better but more expensive)
+        });*/
+    //PIXICam.filters = [PIXICam.GLOW_FILTER];
+
+
+    // Create the background sprite with a basic white texture
+    let bg = new Sprite(Texture.WHITE);
+    // Set it to fill the screen
+    bg.width = GameState.mapWH;//PIXIApp.screen.width;
+    bg.height = GameState.mapWH;//PIXIApp.screen.height;
+    // Tint it to whatever color you want, here red
+    bg.tint = 0x111111;
+    // Add a click handler
+    bg.interactive = true;
+    bg.on('pointerdown', function (event) {
+        let mx = Math.floor(event.data.global.x)
+        let my = Math.floor(event.data.global.y)
+        GameState.mDown = 1;
+        if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
+            let ox = PIXIApp.screen.width / 2 - mx;
+            let oy = PIXIApp.screen.height / 2 - my;
+            GameState.INPUT = [ox, oy, GameState.mDown];
+        }
+    });
+    bg.on('pointermove', function (event) {
+        let mx = Math.floor(event.data.global.x)
+        let my = Math.floor(event.data.global.y)
+        if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
+            //console.log(`Mouse X: ${mx}, Mouse Y: ${my}`);
+            let dc: any = Object.keys(GameState.gameObjects.dynamics).length;
+            let uc: any = Object.keys(GameState.gameObjects.units).length;
+            if (GameState.prevData) {
+                dc = dc + "/" + Object.keys(GameState.prevData.dynamics).length;
+                uc = uc + "/" + Object.keys(GameState.prevData.units).length;
+            }
+            let ox = PIXIApp.screen.width / 2 - mx;
+            let oy = PIXIApp.screen.height / 2 - my;
+            let str = "[ " + mx + ", " + my + " ] dcount: " + dc + " ucount: " + uc
+            str = str + " offset: " + ox + "," + oy;
+            str = str + " Zoom: " + (GameState.PIXICam.scale.x).toFixed(2);
+            str = str + " Ping: " + GameState.PING;
+            //$("#info").html(str);
+            GameState.gData["info_text"].text = str;
+            //GameState.gData["info_text"].text = mx + " " + my;
+            //GameState.INPUT = [mx, my];
+            GameState.INPUT = [ox, oy, GameState.mDown];
+        }
+        //console.log(mx + " " + my)
+
+    });
+    bg.on('pointerup', function (event) {
+        let mx = Math.floor(event.data.global.x)
+        let my = Math.floor(event.data.global.y)
+        console.log(`Mouse X: ${mx}, Mouse Y: ${my}`);
+        GameState.mDown = 0;
+        if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
+            let ox = PIXIApp.screen.width / 2 - mx;
+            let oy = PIXIApp.screen.height / 2 - my;
+            GameState.INPUT = [ox, oy, GameState.mDown];
+        }
+    });
+    bg.on('pointerout', function (event) {
+        let mx = Math.floor(event.data.global.x)
+        let my = Math.floor(event.data.global.y)
+        console.log(`OUT Mouse X: ${mx}, Mouse Y: ${my}`);
+        GameState.mDown = 0;
+        if (mx > 0 && my > 0 && mx < PIXIApp.screen.width && my < PIXIApp.screen.height) {
+            let ox = PIXIApp.screen.width / 2 - mx;
+            let oy = PIXIApp.screen.height / 2 - my;
+            GameState.INPUT = [ox, oy, GameState.mDown];
+        }
+    });
+    // Add it to the stage as the first object
+    //PIXIApp.stage.addChild(bg);
+    GameState.PIXICam.addChild(bg);
+    //PIXI_Viewport.addChild(bg)
+
+
+    //Zoom test
+    bg.addEventListener('wheel', (event) => {
+        event.preventDefault(); // Prevent page scrolling
+        const zoomFactor = 1.5; // Adjust for desired zoom speed
+
+        if (event.deltaY < 0) { // Scrolling up (zoom in)
+            // Example: Zoom in on a specific container
+            //GameState.PIXICam.scale.set(0.7);
+            if (GameState.PIXICam.scale.x < 5) {
+                GameState.PIXICam.scale.x *= zoomFactor;
+                GameState.PIXICam.scale.y *= zoomFactor;
+
+            }
+        } else { // Scrolling down (zoom out)
+            if (GameState.PIXICam.scale.x > 0.1) {
+                GameState.PIXICam.scale.x /= zoomFactor;
+                GameState.PIXICam.scale.y /= zoomFactor;
+
+            }
+        }
+    });
+
+    //const tilingSprite = new PIXI.TilingSprite(texture_bk, MapWH, MapWH);
+    GameState.PIXITiledBK = new TilingSprite(bkTexture, GameState.ViewW, GameState.ViewH);
+    GameState.PIXITiledBK.position.set(0, 0);
+    GameState.PIXICam.addChild(GameState.PIXITiledBK);
+
+    GameState.PIXIGfx = new Graphics();
+    GameState.PIXIGfx.lineStyle(50, 0xFF0000).circle(GameState.mapWH / 2, GameState.mapWH / 2, GameState.mapWH / 2).stroke(0xFF0000)
+    //Draws it here
+    GameState.PIXICam.addChild(GameState.PIXIGfx);
+
+    let textStyle = new TextStyle({
+        fontFamily: 'Arial',
+        fontSize: 14, fill: 0xffffff,
+        align: 'center',
+        dropShadow: {
+            color: '#000000',
+            angle: Math.PI / 6,
+            blur: 5,
+            distance: 6,
+        },
+    });
+    GameState.gData["info_text"] = new Text('Hello, PixiJS!', textStyle);
+    GameState.gData["info_text"].x = 512; GameState.gData["info_text"].y = 20;
+    GameState.gData["info_text"].anchor.set(0.5); // Center the anchor point
+    PIXIApp.stage.addChild(GameState.gData["info_text"]);
+    //GameState.PIXICam.addChild(GameState.gData["info_text"]);
+
+    setInterval(() => {
+        if (GameState.INPUT && GameState.socket) {
+            GameState.socket.send(JSON.stringify({ type: "input", d: GameState.INPUT }));
+
+            //FixedUpdate()
+            //GameState.INPUT = null;//reset
+        }
+    }, 100);
+
+    /* todo: update ticker
+    PIXIApp.ticker.add((delta) => {
+        process(delta);
+    });
+    */
+
+    // Assuming 'app.stage' is your main container
+    let zoomFactor = 2;
+    //PIXIApp.stage.scale.x *= zoomFactor;
+    //PIXIApp.stage.scale.y *= zoomFactor;
+
+    /*
+        const viewport = new Viewport({
+            screenWidth: window.innerWidth,
+            screenHeight: window.innerHeight,
+            worldWidth: 1000, // Example world size
+            worldHeight: 1000,
+            // Add other options as needed
+        });
+    
+        PIXIApp.stage.addChild(viewport);
+    
+    // Enable mouse wheel zooming
+        viewport.wheel();
+    
+    // You can also programmatically zoom
+        viewport.zoom(zoomFactor);*/
 }
