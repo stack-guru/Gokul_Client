@@ -1,7 +1,5 @@
 import { Application } from "pixi.js";
-import { setupWebsocket } from "./websocket";
-import { initAssets } from "./asset";
-import { onUpdate, setupGraphic, process } from "./game";
+import { process, gameStart } from "./game";
 import { generateBackgroundSpots, drawBackground } from "./object/background";
 import { getRandomVibrantColor } from "./object/snake";
 import { Snake } from "./object/snake";
@@ -35,9 +33,13 @@ export const app = new Application();
     food.draw(ctx);
   }
 
-  await setupGraphic();
-  await initAssets();
-  setupWebsocket(onUpdate);
+  // Button click
+  const startButton = document.getElementById("bstart");
+  startButton?.addEventListener("click", async () => {
+    await gameStart();
+    (document.getElementById("startup") as HTMLElement).style.display = "none";
+    (document.getElementById("gameCanvas") as HTMLElement).style.display = "none";
+  });
 
   app.ticker.add((time) => {
     process()

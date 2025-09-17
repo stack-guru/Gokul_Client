@@ -1,4 +1,6 @@
 import { Texture, Sprite, Container, TilingSprite, Graphics, TextStyle, Text } from "pixi.js";
+import { initAssets } from "./asset";
+import { setupWebsocket } from "./websocket";
 import { app as PIXIApp } from "./main";
 import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect, calculateLerp } from "./utils";
 import {
@@ -493,7 +495,7 @@ function fitFIX(center: boolean, stage: any, screenWidth: number, screenHeight: 
     }
 }
 
-export async function setupGraphic() {
+async function setupGraphic() {
     // 1. Create a PixiJS Application
     //PIXIApp = new PIXI.Application();
     //await PIXIApp.init({ background: "#1099bb", resizeTo: window });
@@ -794,4 +796,10 @@ export async function setupGraphic() {
     
     // You can also programmatically zoom
         viewport.zoom(zoomFactor);*/
+}
+
+export async function gameStart() {
+    await setupGraphic();
+    await initAssets();
+    setupWebsocket(onUpdate);
 }
