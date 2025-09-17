@@ -97,7 +97,7 @@ export function process() {
     // Get the global mouse position
     // const pos = PIXIApp.renderer.events.pointer.global;
     // const mx = Math.floor(pos.x)
-    // const my = Math.floor(pos.x)
+    // const my = Math.floor(pos.y)
 
     //Update Objects to tx/ty
     let id, obj;
@@ -119,7 +119,7 @@ export function process() {
             // const offset = obj.width / 4;
             obj.onViewUpdate();
             if (obj.EYES1 !== null) {
-                const rxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, -obj.width / 6);
+                const rxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 3.5, -obj.width / 5);
                 obj.EYES1.x = rxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
                 obj.EYES1.y = rxy[1];//obj.y + Math.sin(obj.rotation - 0.85) * obj.height/2 * 0.60;
                 if (GameState.INPUT) {
@@ -129,7 +129,7 @@ export function process() {
 
             }
             if (obj.EYES2 !== null) {
-                const lxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 4, obj.width / 6);
+                const lxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 3.5, obj.width / 5);
                 obj.EYES2.x = lxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
                 obj.EYES2.y = lxy[1];//obj.y + Math.sin(obj.rotation - 0.85) * obj.height/2 * 0.60;
                 if (GameState.INPUT) {
@@ -254,7 +254,9 @@ export function onUpdate(pId: number, data: any) {
                 //{ name: 'Classic', color:  },                { name: 'Neon', color: '#00ff88' },                { name: 'Fire', color: '#ff4400' },
                 //{ name: 'Ocean', color: '#0088ff' },                { name: 'Purple', color: '#aa44ff' },                { name: 'Gold', color: '#ffaa00' }
 
-                GameState.gameObjects.dynamics[id].tint = COLORS[randomNumber(COLORS.length - 1)];//rgbToHex(RandInt(256), RandInt(256), RandInt(256));
+                // GameState.gameObjects.dynamics[id].tint = COLORS[randomNumber(COLORS.length - 1)];//rgbToHex(RandInt(256), RandInt(256), RandInt(256));
+                GameState.gameObjects.dynamics[id].tint = COLORS[obj[9]];//index based
+                GameState.gameObjects.dynamics[id].COLOR = GameState.gameObjects.dynamics[id].tint;//Save Base color
                 GameState.gameObjects.dynamics[id].tx = obj[1];
                 GameState.gameObjects.dynamics[id].ty = obj[2];
                 GameState.gameObjects.dynamics[id].width = obj[5]
@@ -274,7 +276,7 @@ export function onUpdate(pId: number, data: any) {
         }
     }
 
-    // const gspeed = 0.1;
+    const gspeed = 0.05;
     for (id in data.units) {
         if (data.units.hasOwnProperty(id)) {
             obj = data.units[id];
@@ -283,8 +285,12 @@ export function onUpdate(pId: number, data: any) {
                 existingObj.tx = obj[1];
                 existingObj.ty = obj[2];
                 existingObj.width = obj[5];
-                existingObj.height = obj[6];
                 existingObj.rotation = obj[8];
+                if (obj[14] === 0) {
+                    existingObj.height = obj[6] * 1.4; //stretch
+                } else {
+                    existingObj.height = obj[6];
+                }
                 //                existingObj.rotation = obj[8] +  0.785398  * 2;
 
                 if (existingObj.EYES !== null) {
@@ -312,15 +318,24 @@ export function onUpdate(pId: number, data: any) {
                     //console.log("ON")
                     //fade in / out GLOW
                     existingObj.GLOW.visible = true;
-                    existingObj.GLOW.alpha = 1;
+                    // existingObj.GLOW.alpha = 1;
+                    if (existingObj.GLOW.tint !== existingObj.tint) {
+                        existingObj.GLOW.tint = existingObj.tint;
+                    }
                     existingObj.GLOW.tint = existingObj.tint;
                     if (existingObj.GLOW_DIR === 0) {
-                        //existingObj.GLOW.alpha -= gspeed;
-                        //if(existingObj.GLOW.alpha < 0.5){existingObj.GLOW.alpha = 0.5; existingObj.GLOW_DIR = 1;}
+                        existingObj.GLOW.alpha -= gspeed;
+                        if (existingObj.GLOW.alpha < 0.5) {
+                            existingObj.GLOW.alpha = 0.3;
+                            existingObj.GLOW_DIR = 1;
+                        }
                     }
                     else {
-                        //existingObj.GLOW.alpha += gspeed;
-                        //if(existingObj.GLOW.alpha > 1){existingObj.GLOW.alpha = 1; existingObj.GLOW_DIR = 0;}
+                        existingObj.GLOW.alpha += gspeed;
+                        if (existingObj.GLOW.alpha > 1) {
+                            existingObj.GLOW.alpha = 1;
+                            existingObj.GLOW_DIR = 0;
+                        }
                     }
 
                     //existingObj.alpha = (10 - obj[16]) * 0.2;
@@ -342,7 +357,7 @@ export function onUpdate(pId: number, data: any) {
                     if (obj[16] === 4) {
                         addAmount = 6;
                     }
-                    existingObj.tint = adjustBrightnessRGB(color[0], color[1], color[2], addAmount * 5 - 50);
+                    existingObj.tint = adjustBrightnessRGB(color[0], color[1], color[2], addAmount * 20 - 200);
                     //console.log(obj[16])
                     //let aff = existingObj.GLOW.alpha * 255;
                     //existingObj.tint = rgbToHex(aff, aff, aff );
@@ -456,7 +471,7 @@ function onResize() {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    fitFIX(true, GameState.PIXICam, screenWidth, screenHeight, 1024, 1024)
+    fitFIX(true, GameState.PIXICam, screenWidth, screenHeight, 512, 512)
 
     if (GameState.PIXICam) {
         //PIXICam.resize(screenWidth, screenHeight); // Update the viewport's size
@@ -503,6 +518,26 @@ function fitFIX(center: boolean, stage: any, screenWidth: number, screenHeight: 
         stage.position.y = centerYInScreenPixels - virtualHeightInScreenPixels * 0.5;
     }
 }
+
+// function DoubleTap() {
+//     let lastTapTime = 0;
+//     const doubleTapThreshold = 300; // milliseconds
+
+//     myInteractiveObject.on('pointertap', (event) => {
+//         const currentTime = performance.now();
+//         if (currentTime - lastTapTime < doubleTapThreshold) {
+//             // This is a double tap
+//             console.log("Double tap detected!");
+//             // Perform double tap action
+//             lastTapTime = 0; // Reset for next double tap
+//         } else {
+//             // This is a single tap
+//             console.log("Single tap detected!");
+//             // Perform single tap action
+//             lastTapTime = currentTime;
+//         }
+//     });
+// }
 
 async function setupGraphic() {
     // 1. Create a PixiJS Application
@@ -803,6 +838,9 @@ async function setupGraphic() {
     
     // You can also programmatically zoom
         viewport.zoom(zoomFactor);*/
+
+    //Trigger
+    onResize();
 }
 
 export async function gameStart() {
