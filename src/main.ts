@@ -39,9 +39,7 @@ export const app = new Application();
     await gameStart();
     (document.getElementById("startup") as HTMLElement).style.display = "none";
     (document.getElementById("gameCanvas") as HTMLElement).style.display = "none";
-  });
-
-  app.ticker.add((time) => {
-    process()
+    (document.getElementById("start_btn_containeer") as HTMLElement).style.display = "none";
+    (document.getElementById("app") as HTMLElement).style.display = "flex";
   });
 })();

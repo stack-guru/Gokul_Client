@@ -769,11 +769,9 @@ async function setupGraphic() {
         }
     }, 100);
 
-    /* todo: update ticker
     PIXIApp.ticker.add((delta) => {
-        process(delta);
+        process();
     });
-    */
 
     // Assuming 'app.stage' is your main container
     let zoomFactor = 2;
