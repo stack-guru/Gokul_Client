@@ -10,8 +10,7 @@ export const GameState = {
         statics: {}
     } as GameObjects,
     // Objects: {},
-    cameraX: 0, //camera target
-    INPUT: null as any,
+    cameraX: 0, //camera target,
     cameraY: 0,
     pivotX: 0,
     pivotY: 0,
@@ -23,6 +22,7 @@ export const GameState = {
     ViewH: 2048,
     mapWH: 10000,
     mDown: 0,
+    INPUT: null as any,
     PING: 0 as any,
     SKIP_MS: false,
     RENDER_DELAY: 100,
@@ -34,4 +34,13 @@ export const GameState = {
     PIXITiledBK: null as any,
     PIXI_Viewport: null as any,
     PIXIGfx: null as any,
+
+    // background
+    backgroundSpots: [] as any[],
+    spotCount: 60,
+    spotRadius: 200,
+    camera: {
+        x: 0,
+        y: 0
+    }
 }

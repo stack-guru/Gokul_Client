@@ -10,6 +10,7 @@
     "dev": "vite"
   },
   "dependencies": {
+    "canvas": "^3.2.0",
     "msgpackr": "^1.11.5",
     "pixi.js": "^8.8.1"
   },

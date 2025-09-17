@@ -2,16 +2,30 @@ import { Application, Assets, Sprite } from "pixi.js";
 import { setupWebsocket } from "./websocket";
 import { initAssets } from "./asset";
 import { onUpdate, setupGraphic } from "./game";
+import { generateBackgroundSpots, drawBackground } from "./object/background";
+import { getRandomVibrantColor } from "./object/snake";
 
 // Create a new application
 export const app = new Application();
 
 (async () => {
-  // Initialize the application
-  await app.init({ background: "#1099bb", resizeTo: window });
+  /*
+    // Initialize the application
+    await app.init({ background: "#1099bb", resizeTo: window });
+    // Append the application canvas to the document body
+    document.getElementById("pixi-container")!.appendChild(app.canvas);
+  */
+  const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+  const ctx = canvas?.getContext('2d');
 
-  // Append the application canvas to the document body
-  document.getElementById("pixi-container")!.appendChild(app.canvas);
+  if (ctx) {
+    // ctx.fillStyle = '#RRGGBB'; // Replace RRGGBB with your desired hex color code
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    generateBackgroundSpots();
+    drawBackground(canvas, ctx);
+  }
+  const randomColor = getRandomVibrantColor();
 
   await setupGraphic();
   await initAssets();
