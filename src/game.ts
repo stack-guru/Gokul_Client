@@ -286,11 +286,12 @@ export function onUpdate(pId: number, data: any) {
                 existingObj.ty = obj[2];
                 existingObj.width = obj[5];
                 existingObj.rotation = obj[8];
-                if (obj[14] === 0) {
-                    existingObj.height = obj[6] * 1.4; //stretch
-                } else {
-                    existingObj.height = obj[6];
-                }
+                existingObj.height = obj[6];
+                // if (obj[14] === BODY) {
+                //     existingObj.height = obj[6] * 1.4; //stretch
+                // } else {
+                //     existingObj.height = obj[6];
+                // }
                 //                existingObj.rotation = obj[8] +  0.785398  * 2;
 
                 if (existingObj.EYES !== null) {
