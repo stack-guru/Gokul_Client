@@ -14,12 +14,12 @@ import {
     bkTexture,
     glowTexture
 } from "./asset";
-import { HEAD_EYES } from "./constant";
+import { HEAD_EYES, MOUSE_CLICKED, MOUSE_NOT_CLICKED } from "./constant";
 import { GameState } from "./gameState";
 
 function CreateCircle(texture: Texture, x: number, y: number, z: number, scale = 1, rot = 0) {
     GameState.gId++;
-    const sprite = new Sprite(texture);
+    const sprite = new Sprite({ texture, roundPixels: true });
     sprite.position.set(x, y); // Set x and y coordinates
     sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
     sprite.scale.set(scale); // Double the size
@@ -314,7 +314,7 @@ export function onUpdate(pId: number, data: any) {
                 existingObj.GLOW.height = obj[6] * 2;
                 existingObj.GLOW.rotation = obj[8];
 
-                if (obj[15] === 1) {// && existingObj.filters === null){
+                if (obj[15] === MOUSE_CLICKED) {// && existingObj.filters === null){
                     //                    existingObj.filters = [GameState.PIXICam.GLOW_FILTER];//ON GLOW
                     //console.log("ON")
                     //fade in / out GLOW
@@ -364,7 +364,7 @@ export function onUpdate(pId: number, data: any) {
                     //existingObj.tint = rgbToHex(aff, aff, aff );
 
                 }
-                if (obj[15] === 0) {// && existingObj.filters !== null){
+                if (obj[15] === MOUSE_NOT_CLICKED) {// && existingObj.filters !== null){
                     //                    existingObj.filters = null;//OFF
                     //console.log("OFF")
                     //existingObj.GLOW.alpha = 0;
@@ -555,7 +555,7 @@ async function setupGraphic() {
         preference: 'webgl', // 'webgl' or 'webgpu'
         width: GameState.ViewW,//window.innerWidth,
         height: GameState.ViewH,//window.innerHeight,
-        backgroundColor: 0x000000,
+        backgroundColor: 0x4E342E, // dark-brown
         antialias: true, // Smooth pixelated edges
         resizeTo: window, // Auto-resize target
     });
@@ -688,8 +688,8 @@ async function setupGraphic() {
     // Set it to fill the screen
     bg.width = GameState.mapWH;//PIXIApp.screen.width;
     bg.height = GameState.mapWH;//PIXIApp.screen.height;
-    // Tint it to whatever color you want, here red
-    bg.tint = 0x111111;
+    // Tint it to dark-brown
+    bg.tint = 0x4E342E;
     // Add a click handler
     bg.interactive = true;
     bg.on('pointerdown', function (event) {
