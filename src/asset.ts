@@ -9,6 +9,7 @@ export let bodyTexture3: Texture;
 export let bodyTexture4: Texture;
 export let bkTexture: Texture;
 export let glowTexture: Texture;
+export let bgTexture: Texture;
 
 export async function initAssets() {
     headTexture = await Assets.load('assets/img/ch.png');//Head
@@ -20,4 +21,5 @@ export async function initAssets() {
     bodyTexture4 = await Assets.load('assets/img/c4.png');
     bkTexture = await Assets.load('assets/img/bk.png');
     glowTexture = await Assets.load('assets/img/c4g.png');
+    bgTexture = await Assets.load('assets/img/bg.jpg');
 }
