@@ -19,7 +19,7 @@ import { GameState } from "./gameState";
 
 function CreateCircle(texture: Texture, x: number, y: number, z: number, scale = 1, rot = 0) {
     GameState.gId++;
-    const sprite = new Sprite({ texture, roundPixels: true });
+    const sprite = new Sprite({ texture });
     sprite.position.set(x, y); // Set x and y coordinates
     sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
     sprite.scale.set(scale); // Double the size
@@ -117,7 +117,8 @@ export function process() {
             obj.y = calculateLerp(obj.y, obj.ty, GameState.LERPP);
             if (obj.EYES !== null) { obj.EYES.x = obj.x; obj.EYES.y = obj.y; }
             // const offset = obj.width / 4;
-            obj.onViewUpdate();
+
+            // obj.onViewUpdate();
             if (obj.EYES1 !== null) {
                 const rxy = rotate_by_pivot(obj.x, obj.y, obj.rotation, obj.width / 3.5, -obj.width / 5);
                 obj.EYES1.x = rxy[0];//obj.x + Math.cos(obj.rotation - 0.85) * obj.width/2 * 0.60;
@@ -151,8 +152,8 @@ export function process() {
     //GameState.PIXICam.x++
     //GameState.PIXICam.x = calculateLerp(GameState.PIXICam.x, CX , 0.1);
     //GameState.PIXICam.y = calculateLerp(GameState.PIXICam.y, CY , 0.1);
-    GameState.PIXICam.pivot.x = calculateLerp(GameState.PIXICam.pivot.x, GameState.pivotX, 0.1);
-    GameState.PIXICam.pivot.y = calculateLerp(GameState.PIXICam.pivot.y, GameState.pivotY, 0.1);
+    GameState.PIXICam.pivot.x = calculateLerp(GameState.PIXICam.pivot.x, GameState.pivotX, 0.2);
+    GameState.PIXICam.pivot.y = calculateLerp(GameState.PIXICam.pivot.y, GameState.pivotY, 0.2);
     GameState.PIXICam.x = PIXIApp.screen.width / 2;
     GameState.PIXICam.y = PIXIApp.screen.height / 2;
 
@@ -555,7 +556,7 @@ async function setupGraphic() {
         preference: 'webgl', // 'webgl' or 'webgpu'
         width: GameState.ViewW,//window.innerWidth,
         height: GameState.ViewH,//window.innerHeight,
-        backgroundColor: 0x3E2723, // darker brown
+        backgroundColor: 0x000000,
         antialias: true, // Smooth pixelated edges
         resizeTo: window, // Auto-resize target
     });
@@ -688,8 +689,7 @@ async function setupGraphic() {
     // Set it to fill the screen
     bg.width = GameState.mapWH;//PIXIApp.screen.width;
     bg.height = GameState.mapWH;//PIXIApp.screen.height;
-    // Tint it to darker brown
-    bg.tint = 0x3E2723;
+    bg.tint = 0x111111;
     // Add a click handler
     bg.interactive = true;
     bg.on('pointerdown', function (event) {
