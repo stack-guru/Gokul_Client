@@ -555,7 +555,7 @@ async function setupGraphic() {
         preference: 'webgl', // 'webgl' or 'webgpu'
         width: GameState.ViewW,//window.innerWidth,
         height: GameState.ViewH,//window.innerHeight,
-        backgroundColor: 0x4E342E, // dark-brown
+        backgroundColor: 0x3E2723, // darker brown
         antialias: true, // Smooth pixelated edges
         resizeTo: window, // Auto-resize target
     });
@@ -688,8 +688,8 @@ async function setupGraphic() {
     // Set it to fill the screen
     bg.width = GameState.mapWH;//PIXIApp.screen.width;
     bg.height = GameState.mapWH;//PIXIApp.screen.height;
-    // Tint it to dark-brown
-    bg.tint = 0x4E342E;
+    // Tint it to darker brown
+    bg.tint = 0x3E2723;
     // Add a click handler
     bg.interactive = true;
     bg.on('pointerdown', function (event) {
