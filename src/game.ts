@@ -4,8 +4,8 @@ import { app as PIXIApp } from "./main";
 import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect, calculateLerp } from "./utils";
 import {
     initAssets,
-    eyesTexture,
-    eyeTexture,
+    // eyesTexture,
+    // eyeTexture,
     bodyTexture1,
     // bodyTexture2,
     // bodyTexture3,
@@ -13,55 +13,34 @@ import {
     bkTexture,
     glowTexture,
 } from "./asset";
-import { HEAD_EYES, MOUSE_CLICKED, MOUSE_NOT_CLICKED } from "./constant";
+import { HEAD_EYES, MOUSE_CLICKED, MOUSE_NOT_CLICKED, ONE_EYE, BODY_CIRCLE, TEXTURE_CIRCLE, TWO_EYES } from "./constant";
 import { GameState } from "./gameState";
 
-function CreateCircle(texture: Texture | null, x: number, y: number, z: number, scale = 1, rot = 0, color: string | null = null) {
+function CreateCircle(type: number, texture: Texture | null, x: number, y: number, z: number, scale = 1, rot = 0, color: string | null = null) {
     GameState.gId++;
-    if (!texture) {
+    if (type === ONE_EYE) {
         const gfx = new Graphics();
-        const baseRadius = 16;
-
-        const baseColor = color ?? "#FFFFFF";
-        const toRGB = (c: string | number) => {
-            if (typeof c === "number") {
-                const r = (c >> 16) & 0xFF;
-                const g = (c >> 8) & 0xFF;
-                const b = c & 0xFF;
-                return [r, g, b] as [number, number, number];
-            }
-            const hex = c.startsWith('#') ? c.slice(1) : c;
-            const num = parseInt(hex, 16);
-            const r = (num >> 16) & 0xFF;
-            const g = (num >> 8) & 0xFF;
-            const b = num & 0xFF;
-            return [r, g, b] as [number, number, number];
-        };
-        const clamp = (v: number) => Math.max(0, Math.min(255, v));
-        const [r, g, b] = toRGB(baseColor);
-        const toHexNumber = (rr: number, gg: number, bb: number) => ((rr & 0xFF) << 16) | ((gg & 0xFF) << 8) | (bb & 0xFF);
-        const dark = toHexNumber(clamp(r - 60), clamp(g - 60), clamp(b - 60));
-        const bright = toHexNumber(clamp(r + 60), clamp(g + 60), clamp(b + 60));
-
-        const colorStops = [dark, bright];
-
-        // Create a fill gradient
-        const gradientFill = new FillGradient(0.5, 0, 0.5, 1);
-
-        // Add the color stops to the fill gradient
-        colorStops.forEach((number, index) => {
-            const ratio = index / colorStops.length;
-            gradientFill.addColorStop(ratio, number);
-        });
-
-        gfx.circle(0, 0, baseRadius).fill(gradientFill);
+        gfx.circle(0, 0, 4).fill("#ffffff");
+        gfx.circle(1, 0, 3).fill("#000000");
         gfx.position.set(x, y);
         gfx.scale.set(scale);
         gfx.rotation = rot;
         gfx.zIndex = z;
         GameState.PIXICam.addChild(gfx);
         return gfx;
-    } else {
+    } else if (type === TWO_EYES) {
+        const gfx = new Graphics();
+        gfx.circle(8, -6, 4).fill("#ffffff");
+        gfx.circle(9, -6, 3).fill("#000000");
+        gfx.circle(8, 6, 4).fill("#ffffff");
+        gfx.circle(9, 6, 3).fill("#000000");
+        gfx.position.set(x, y);
+        gfx.scale.set(scale);
+        gfx.rotation = rot;
+        gfx.zIndex = z;
+        GameState.PIXICam.addChild(gfx);
+        return gfx;
+    } else if (type === TEXTURE_CIRCLE && texture) {
         const sprite = new Sprite({ texture });
         sprite.position.set(x, y); // Set x ,and y coordinates
         sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
@@ -74,6 +53,51 @@ function CreateCircle(texture: Texture | null, x: number, y: number, z: number, 
         // sprite.REMOVE = 0;//flag to remove
         return sprite;
     }
+
+    const gfx = new Graphics();
+    const baseRadius = 16;
+
+    const baseColor = color ?? "#FFFFFF";
+    const toRGB = (c: string | number) => {
+        if (typeof c === "number") {
+            const r = (c >> 16) & 0xFF;
+            const g = (c >> 8) & 0xFF;
+            const b = c & 0xFF;
+            return [r, g, b] as [number, number, number];
+        }
+        const hex = c.startsWith('#') ? c.slice(1) : c;
+        const num = parseInt(hex, 16);
+        const r = (num >> 16) & 0xFF;
+        const g = (num >> 8) & 0xFF;
+        const b = num & 0xFF;
+        return [r, g, b] as [number, number, number];
+    };
+
+    // body circle
+    const clamp = (v: number) => Math.max(0, Math.min(255, v));
+    const [r, g, b] = toRGB(baseColor);
+    const toHexNumber = (rr: number, gg: number, bb: number) => ((rr & 0xFF) << 16) | ((gg & 0xFF) << 8) | (bb & 0xFF);
+    const dark = toHexNumber(clamp(r - 60), clamp(g - 60), clamp(b - 60));
+    const bright = toHexNumber(clamp(r + 60), clamp(g + 60), clamp(b + 60));
+
+    const colorStops = [dark, bright];
+
+    // Create a fill gradient
+    const gradientFill = new FillGradient(0.5, 0, 0.5, 1);
+
+    // Add the color stops to the fill gradient
+    colorStops.forEach((number, index) => {
+        const ratio = index / colorStops.length;
+        gradientFill.addColorStop(ratio, number);
+    });
+
+    gfx.circle(0, 0, baseRadius).fill(gradientFill);
+    gfx.position.set(x, y);
+    gfx.scale.set(scale);
+    gfx.rotation = rot;
+    gfx.zIndex = z;
+    GameState.PIXICam.addChild(gfx);
+    return gfx;
 }
 
 function rotate_by_pivot(px: number, py: number, pr: number, ox: number, oy: number) {//sets location by rotating around a different pivot point
@@ -290,7 +314,7 @@ export function onUpdate(pId: number, data: any) {
                 //console.log('CreateCircle ' + obj[0])
                 //console.log(obj)
                 //GameState.gameObjects.dynamics[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
-                GameState.gameObjects.dynamics[id] = CreateCircle(bodyTexture1, obj[1], obj[2], obj[3], 1);
+                GameState.gameObjects.dynamics[id] = CreateCircle(TEXTURE_CIRCLE, bodyTexture1, obj[1], obj[2], obj[3], 1);
                 //let COLORS =  ["f5e0dc", "f2cdcd", "f5c2e7", "cba6f7", "f38ba8", "eba0ac", "fab387", "f9e2af",
                 //"a6e3a1", "94e2d5", "89dceb", "74c7ec", "89b4fa", "b4befe"];
                 //COLORS = ['EAB999', '00ff88', 'ff4400', '0088ff', 'aa44ff', 'ffaa00']
@@ -340,18 +364,18 @@ export function onUpdate(pId: number, data: any) {
                 //                existingObj.rotation = obj[8] +  0.785398  * 2;
 
                 if (existingObj.EYES !== null) {
-                    existingObj.EYES.width = obj[5];
-                    existingObj.EYES.height = obj[6];
+                    // existingObj.EYES.width = obj[5];
+                    // existingObj.EYES.height = obj[6];
                     existingObj.EYES.rotation = obj[8];
                 }
                 if (existingObj.EYES1 !== null) {
-                    existingObj.EYES1.width = obj[5];
-                    existingObj.EYES1.height = obj[6];
+                    // existingObj.EYES1.width = obj[5];
+                    // existingObj.EYES1.height = obj[6];
                     existingObj.EYES1.rotation = obj[8];
                 }
                 if (existingObj.EYES2 !== null) {
-                    existingObj.EYES2.width = obj[5];
-                    existingObj.EYES2.height = obj[6];
+                    // existingObj.EYES2.width = obj[5];
+                    // existingObj.EYES2.height = obj[6];
                     existingObj.EYES2.rotation = obj[8];
                 }
 
@@ -445,27 +469,27 @@ export function onUpdate(pId: number, data: any) {
                 let tempObject: any;
                 const tint = COLORS[obj[13]];;//index based
                 if (obj[14] === HEAD_EYES) {//Head/Eyes
-                    tempObject = CreateCircle(null, obj[1], obj[2], obj[3], 1, 0, tint);
+                    tempObject = CreateCircle(BODY_CIRCLE, null, obj[1], obj[2], obj[3], 1, 0, tint);
                     if (id === pId.toString()) {//Extra Glow etc
                         tempObject.EYES = null;
-                        tempObject.EYES1 = CreateCircle(eyeTexture, obj[1], obj[2], obj[3] + 1, 1);
-                        tempObject.EYES1.width = obj[5]; tempObject.EYES1.height = obj[6];
-                        tempObject.EYES2 = CreateCircle(eyeTexture, obj[1], obj[2], obj[3] + 1, 1);
-                        tempObject.EYES2.width = obj[5]; tempObject.EYES2.height = obj[6];
+                        tempObject.EYES1 = CreateCircle(ONE_EYE, null, obj[1], obj[2], obj[3] + 1, 1);
+                        // tempObject.EYES1.width = obj[5]; tempObject.EYES1.height = obj[6];
+                        tempObject.EYES2 = CreateCircle(ONE_EYE, null, obj[1], obj[2], obj[3] + 1, 1);
+                        // tempObject.EYES2.width = obj[5]; tempObject.EYES2.height = obj[6];
                     }
                     else {
                         tempObject.EYES1 = null; tempObject.EYES2 = null;//non player
-                        tempObject.EYES = CreateCircle(eyesTexture, obj[1], obj[2], obj[3] + 1, 1);
-                        tempObject.EYES.width = obj[5];
-                        tempObject.EYES.height = obj[6];
+                        tempObject.EYES = CreateCircle(TWO_EYES, null, obj[1], obj[2], obj[3] + 1, 1);
+                        // tempObject.EYES.width = obj[5];
+                        // tempObject.EYES.height = obj[6];
                     }
                 }
                 else {
-                    tempObject = CreateCircle(null, obj[1], obj[2], obj[3], 1, 0, tint);
+                    tempObject = CreateCircle(BODY_CIRCLE, null, obj[1], obj[2], obj[3], 1, 0, tint);
                     tempObject.EYES = null; tempObject.EYES1 = null; tempObject.EYES2 = null;
                 }
 
-                tempObject.GLOW = CreateCircle(glowTexture, obj[1], obj[2], obj[3] - 1, 1);
+                tempObject.GLOW = CreateCircle(TEXTURE_CIRCLE, glowTexture, obj[1], obj[2], obj[3] - 1, 1);
                 tempObject.GLOW.alpha = 0.5;
                 tempObject.GLOW_DIR = 0;//RandInt(1);
                 tempObject.GLOW.width = obj[5] * 2;
