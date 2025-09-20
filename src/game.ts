@@ -1,4 +1,4 @@
-import { Texture, Sprite, Container, TilingSprite, Graphics, TextStyle, Text } from "pixi.js";
+import { Texture, Sprite, Container, TilingSprite, Graphics, TextStyle, Text, FillGradient } from "pixi.js";
 import { setupWebsocket } from "./websocket";
 import { app as PIXIApp } from "./main";
 import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect, calculateLerp } from "./utils";
@@ -10,27 +10,70 @@ import {
     // bodyTexture2,
     // bodyTexture3,
     // bodyTexture4,
-    mainBodyTexture,
     bkTexture,
     glowTexture,
-    mainTexture
 } from "./asset";
 import { HEAD_EYES, MOUSE_CLICKED, MOUSE_NOT_CLICKED } from "./constant";
 import { GameState } from "./gameState";
 
-function CreateCircle(texture: Texture, x: number, y: number, z: number, scale = 1, rot = 0) {
+function CreateCircle(texture: Texture | null, x: number, y: number, z: number, scale = 1, rot = 0, color: string | null = null) {
     GameState.gId++;
-    const sprite = new Sprite({ texture });
-    sprite.position.set(x, y); // Set x ,and y coordinates
-    sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
-    sprite.scale.set(scale); // Double the size
-    sprite.rotation = rot;//Math.PI / 4; // Rotate 45 degrees
-    sprite.zIndex = z; // Lower zIndex
-    //PIXIApp.stage.addChild(sprite);
-    GameState.PIXICam.addChild(sprite);
+    if (!texture) {
+        const gfx = new Graphics();
+        const baseRadius = 16;
 
-    // sprite.REMOVE = 0;//flag to remove
-    return sprite;
+        const baseColor = color ?? "#FFFFFF";
+        const toRGB = (c: string | number) => {
+            if (typeof c === "number") {
+                const r = (c >> 16) & 0xFF;
+                const g = (c >> 8) & 0xFF;
+                const b = c & 0xFF;
+                return [r, g, b] as [number, number, number];
+            }
+            const hex = c.startsWith('#') ? c.slice(1) : c;
+            const num = parseInt(hex, 16);
+            const r = (num >> 16) & 0xFF;
+            const g = (num >> 8) & 0xFF;
+            const b = num & 0xFF;
+            return [r, g, b] as [number, number, number];
+        };
+        const clamp = (v: number) => Math.max(0, Math.min(255, v));
+        const [r, g, b] = toRGB(baseColor);
+        const toHexNumber = (rr: number, gg: number, bb: number) => ((rr & 0xFF) << 16) | ((gg & 0xFF) << 8) | (bb & 0xFF);
+        const dark = toHexNumber(clamp(r - 60), clamp(g - 60), clamp(b - 60));
+        const bright = toHexNumber(clamp(r + 60), clamp(g + 60), clamp(b + 60));
+
+        const colorStops = [dark, bright];
+
+        // Create a fill gradient
+        const gradientFill = new FillGradient(0.5, 0, 0.5, 1);
+
+        // Add the color stops to the fill gradient
+        colorStops.forEach((number, index) => {
+            const ratio = index / colorStops.length;
+            gradientFill.addColorStop(ratio, number);
+        });
+
+        gfx.circle(0, 0, baseRadius).fill(gradientFill);
+        gfx.position.set(x, y);
+        gfx.scale.set(scale);
+        gfx.rotation = rot;
+        gfx.zIndex = z;
+        GameState.PIXICam.addChild(gfx);
+        return gfx;
+    } else {
+        const sprite = new Sprite({ texture });
+        sprite.position.set(x, y); // Set x ,and y coordinates
+        sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
+        sprite.scale.set(scale); // Double the size
+        sprite.rotation = rot;//Math.PI / 4; // Rotate 45 degrees
+        sprite.zIndex = z; // Lower zIndex
+        //PIXIApp.stage.addChild(sprite);
+        GameState.PIXICam.addChild(sprite);
+
+        // sprite.REMOVE = 0;//flag to remove
+        return sprite;
+    }
 }
 
 function rotate_by_pivot(px: number, py: number, pr: number, ox: number, oy: number) {//sets location by rotating around a different pivot point
@@ -400,8 +443,9 @@ export function onUpdate(pId: number, data: any) {
                 //console.log(obj)
                 //GameState.gameObjects.units[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
                 let tempObject: any;
+                const tint = COLORS[obj[13]];;//index based
                 if (obj[14] === HEAD_EYES) {//Head/Eyes
-                    tempObject = CreateCircle(mainTexture, obj[1], obj[2], obj[3], 1);
+                    tempObject = CreateCircle(null, obj[1], obj[2], obj[3], 1, 0, tint);
                     if (id === pId.toString()) {//Extra Glow etc
                         tempObject.EYES = null;
                         tempObject.EYES1 = CreateCircle(eyeTexture, obj[1], obj[2], obj[3] + 1, 1);
@@ -417,8 +461,7 @@ export function onUpdate(pId: number, data: any) {
                     }
                 }
                 else {
-                    tempObject = CreateCircle(mainBodyTexture, obj[1], obj[2], obj[3], 1);
-                    // tempObject = CreateCircle(bodyTexture4, obj[1], obj[2], obj[3], 1);
+                    tempObject = CreateCircle(null, obj[1], obj[2], obj[3], 1, 0, tint);
                     tempObject.EYES = null; tempObject.EYES1 = null; tempObject.EYES2 = null;
                 }
 
@@ -432,8 +475,8 @@ export function onUpdate(pId: number, data: any) {
 
                 //let COLORS =  ["f5e0dc", "f2cdcd", "f5c2e7", "cba6f7", "f38ba8", "eba0ac", "fab387", "f9e2af",
                 //"a6e3a1", "94e2d5", "89dceb", "74c7ec", "89b4fa", "b4befe"];
-                tempObject.tint = COLORS[obj[13]];//index based
-                tempObject.COLOR = tempObject.tint;//Save Base color
+                tempObject.tint = tint;
+                tempObject.COLOR = tint;//Save Base color
                 //COLORS[RandInt(COLORS.length - 1)];//rgbToHex(RandInt(256), RandInt(256), RandInt(256));
 
                 tempObject.tx = obj[1];
