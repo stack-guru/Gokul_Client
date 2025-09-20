@@ -42,5 +42,9 @@ export const GameState = {
     camera: {
         x: 0,
         y: 0
+    },
+    viewScreenSize: {
+        width: 512,
+        height: 512
     }
 }

@@ -1,18 +1,19 @@
 import { Texture, Sprite, Container, TilingSprite, Graphics, TextStyle, Text } from "pixi.js";
-import { initAssets } from "./asset";
 import { setupWebsocket } from "./websocket";
 import { app as PIXIApp } from "./main";
 import { rgbToHex, randomNumber, adjustBrightnessRGB, drawDebugRect, calculateLerp } from "./utils";
 import {
-    headTexture,
+    initAssets,
     eyesTexture,
     eyeTexture,
     bodyTexture1,
     // bodyTexture2,
     // bodyTexture3,
-    bodyTexture4,
+    // bodyTexture4,
+    mainBodyTexture,
     bkTexture,
-    glowTexture
+    glowTexture,
+    mainTexture
 } from "./asset";
 import { HEAD_EYES, MOUSE_CLICKED, MOUSE_NOT_CLICKED } from "./constant";
 import { GameState } from "./gameState";
@@ -20,7 +21,7 @@ import { GameState } from "./gameState";
 function CreateCircle(texture: Texture, x: number, y: number, z: number, scale = 1, rot = 0) {
     GameState.gId++;
     const sprite = new Sprite({ texture });
-    sprite.position.set(x, y); // Set x and y coordinates
+    sprite.position.set(x, y); // Set x ,and y coordinates
     sprite.anchor.set(0.5); // Set anchor point to the center for rotation/scaling around the center
     sprite.scale.set(scale); // Double the size
     sprite.rotation = rot;//Math.PI / 4; // Rotate 45 degrees
@@ -400,7 +401,7 @@ export function onUpdate(pId: number, data: any) {
                 //GameState.gameObjects.units[id] = GFX.add.image(obj[1], obj[2], 'd' + obj[0]);//type
                 let tempObject: any;
                 if (obj[14] === HEAD_EYES) {//Head/Eyes
-                    tempObject = CreateCircle(headTexture, obj[1], obj[2], obj[3], 1);
+                    tempObject = CreateCircle(mainTexture, obj[1], obj[2], obj[3], 1);
                     if (id === pId.toString()) {//Extra Glow etc
                         tempObject.EYES = null;
                         tempObject.EYES1 = CreateCircle(eyeTexture, obj[1], obj[2], obj[3] + 1, 1);
@@ -416,7 +417,8 @@ export function onUpdate(pId: number, data: any) {
                     }
                 }
                 else {
-                    tempObject = CreateCircle(bodyTexture4, obj[1], obj[2], obj[3], 1);
+                    tempObject = CreateCircle(mainBodyTexture, obj[1], obj[2], obj[3], 1);
+                    // tempObject = CreateCircle(bodyTexture4, obj[1], obj[2], obj[3], 1);
                     tempObject.EYES = null; tempObject.EYES1 = null; tempObject.EYES2 = null;
                 }
 
@@ -473,7 +475,7 @@ function onResize() {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    fitFIX(true, GameState.PIXICam, screenWidth, screenHeight, 512, 512)
+    fitFIX(true, GameState.PIXICam, screenWidth, screenHeight, GameState.viewScreenSize.width, GameState.viewScreenSize.height);
 
     if (GameState.PIXICam) {
         //PIXICam.resize(screenWidth, screenHeight); // Update the viewport's size
@@ -559,6 +561,7 @@ async function setupGraphic() {
         backgroundColor: 0x000000,
         antialias: true, // Smooth pixelated edges
         resizeTo: window, // Auto-resize target
+        resolution: window.devicePixelRatio
     });
 
     console.log(PIXIApp.renderer)
